@@ -8,7 +8,7 @@ Unlike traditional chess, RajaChess supports **2-player, 3-player, and 4-player 
 
 ## 🎮 Play RajaChess
 
-🔗 **Live Demo:** [Play RajaChess Live](YOUR-VERCEL-LINK)
+🔗 **Live Demo:** [Play RajaChess Live] https://multiplayer-chess-eta.vercel.app/
 
 > Jump into a 2P, 3P, or 4P chess battle and experience chess in a completely different way.
 
