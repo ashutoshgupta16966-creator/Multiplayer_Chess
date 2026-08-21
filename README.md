@@ -8,7 +8,7 @@ Unlike traditional chess, RajaChess supports **2-player, 3-player, and 4-player 
 
 ## 🎮 Play RajaChess
 
-🔗 **Live Demo:** [Play RajaChess Live] https://multiplayer-chess-eta.vercel.app/
+🔗 **Live Demo:** - https://multiplayer-chess-eta.vercel.app/
 
 > Jump into a 2P, 3P, or 4P chess battle and experience chess in a completely different way.
 
@@ -110,61 +110,6 @@ RajaChess is built using pure web technologies.
 | LocalStorage    | Player data, coins and progress  |
 | Git & GitHub    | Version control                  |
 | Vercel          | Deployment                       |
-
----
-
-## 📁 Project Structure
-
-```text
-RajaChess/
-│
-├── index.html
-├── manifest.json
-├── sw.js
-├── icon.png
-│
-├── css/
-│   └── ...
-│
-└── js/
-    └── ...
-```
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/ashutoshgupta16966-creator/Multiplayer_Chess.git
-```
-
-### 2. Open the Project
-
-```bash
-cd Multiplayer_Chess
-```
-
-### 3. Run the Application
-
-You can open `index.html` directly in a modern browser.
-
-For the best development experience, use **VS Code with Live Server** or deploy the project using Vercel.
-
----
-
-## 🌐 Deployment
-
-RajaChess is deployed as a live web application.
-
-### Deployment Platform
-
-**Vercel**
-
-After deployment, the application can be accessed directly through the Vercel live URL.
-
-🔗 **Live Game:** [YOUR-VERCEL-LINK](YOUR-VERCEL-LINK)
 
 ---
 
