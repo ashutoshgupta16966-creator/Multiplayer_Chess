@@ -1,0 +1,43 @@
+{
+  "name": "RajaChess — Multiplayer Chess",
+  "short_name": "RajaChess",
+  "description": "A stunning multiplayer chess game supporting 2–4 players on a 14×14 cross-shaped board. Play with friends or vs AI locally!",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0a1a",
+  "theme_color": "#f0c040",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "2-Player Game",
+      "short_name": "2P",
+      "description": "Start a 2-player game quickly",
+      "url": "/?mode=2p",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "4-Player Game",
+      "short_name": "4P",
+      "description": "Start a 4-player game quickly",
+      "url": "/?mode=4p",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    }
+  ]
+}
