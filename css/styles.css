@@ -3375,3 +3375,71 @@ body:not(.show-hud) .points-hud,
     border-top: 1px solid var(--border) !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════
+   NEW STYLE BOARD GEOMETRIES & SHAPE VARIANTS
+   ════════════════════════════════════════════════════════════ */
+
+/* ── 3P & 4P: Octagonal Board (8-sided) ── */
+.chess-board.style-newstyle {
+  clip-path: polygon(22% 0%, 78% 0%, 100% 22%, 100% 78%, 78% 100%, 22% 100%, 0% 78%, 0% 22%) !important;
+  border-radius: 14px !important;
+}
+
+/* ── 4P Style 1: Hexagonal Board (6-sided) ── */
+.chess-board.style-ns4-hex {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important;
+  border-radius: 12px !important;
+}
+
+/* ── 4P Style 2: Circular Ring Board ── */
+.chess-board.style-ns4-ring {
+  border-radius: 50% !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+/* ── 4P Style 3: Diamond Board (4 Corners + Hollow Center) ── */
+.chess-board.style-ns4-diamond {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%) !important;
+  border-radius: 12px !important;
+}
+
+/* ── 4P New Style Sub-Selector Screen ── */
+.ns4-style-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.ns4-style-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: var(--transition);
+  text-align: left;
+  width: 100%;
+}
+
+.ns4-style-btn:hover {
+  border-color: var(--gold-400);
+  background: var(--bg-hover);
+  box-shadow: 0 0 16px rgba(240, 192, 64, 0.2);
+  transform: translateY(-2px);
+}
+
+.ns4-icon-hex,
+.ns4-icon-ring,
+.ns4-icon-diamond {
+  font-size: 1.8rem;
+  color: var(--gold-400);
+  flex-shrink: 0;
+}

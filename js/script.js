@@ -19,12 +19,35 @@ var activeZonesSet = new Set();
 
 function isValidCell(row, col) {
   if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
+
+  // ── 3P & 4P New Style — Octagonal 8-sided mask ─────────────
   if (boardStyleMode === 'newstyle' && BOARD_SIZE === 14) {
-    // Diamond/octagonal mask: Manhattan distance from center (6.5,6.5) <= 10.
-    // All 4 player starting positions sit exactly on the boundary (distance = 10),
-    // so piece placement and promotion squares are identical to Ordinary Style.
     return (Math.abs(row - 6.5) + Math.abs(col - 6.5)) <= 10;
   }
+
+  // ── 4P New Style: Style 1 — Hexagonal mask ──────────────────
+  if (boardStyleMode === 'ns4-hex' && BOARD_SIZE === 14) {
+    var hq = col - 6.5;
+    var hr = row - 6.5;
+    var hs = -hq - hr;
+    var hexDist = Math.max(Math.abs(hq), Math.abs(hr), Math.abs(hs));
+    return hexDist <= 6.8;
+  }
+
+  // ── 4P New Style: Style 2 — Circular Ring mask ──────────────
+  if (boardStyleMode === 'ns4-ring' && BOARD_SIZE === 14) {
+    var dr = row - 6.5;
+    var dc = col - 6.5;
+    var dist = Math.sqrt(dr * dr + dc * dc);
+    return dist >= 2.2 && dist <= 7.5;
+  }
+
+  // ── 4P New Style: Style 3 — Hollow Diamond mask ─────────────
+  if (boardStyleMode === 'ns4-diamond' && BOARD_SIZE === 14) {
+    var manhattan = Math.abs(row - 6.5) + Math.abs(col - 6.5);
+    return manhattan <= 10 && manhattan > 2.5;
+  }
+
   if (BOARD_SIZE === 14) {
     if (row <= 2 && col <= 2) return false; // top-left
     if (row <= 2 && col >= 11) return false; // top-right
@@ -33,6 +56,7 @@ function isValidCell(row, col) {
   }
   return true;
 }
+
 
 function getCellZone(row, col) {
   if (!isValidCell(row, col)) return null;
@@ -212,10 +236,19 @@ function renderBoard(activePlayerIds) {
     boardEl.setAttribute('aria-label', '14x14 chess board');
   }
 
+  // Apply / remove NS4 shape classes
+  var ns4Classes = ['style-ns4-hex', 'style-ns4-ring', 'style-ns4-diamond', 'style-newstyle'];
+  ns4Classes.forEach(function (cls) { boardEl.classList.remove(cls); });
+  if (boardStyleMode === 'ns4-hex') boardEl.classList.add('style-ns4-hex');
+  else if (boardStyleMode === 'ns4-ring') boardEl.classList.add('style-ns4-ring');
+  else if (boardStyleMode === 'ns4-diamond') boardEl.classList.add('style-ns4-diamond');
+  else if (boardStyleMode === 'newstyle') boardEl.classList.add('style-newstyle');
+
   const seatZoneMap = { red: 'bottom', yellow: 'top', green: 'left', blue: 'right' };
   activeZonesSet = new Set(activePlayerIds.map(p => seatZoneMap[p]).filter(Boolean));
 
   // Ensure CSS grid templates are not overridden dynamically
+
   boardEl.style.gridTemplateRows = '';
   boardEl.style.gridTemplateColumns = '';
 
@@ -1809,17 +1842,39 @@ function selectBoardStyle(style) {
   document.querySelectorAll('.style-btn').forEach(function (b) { b.classList.remove('selected'); });
   var btn = document.getElementById('style-' + style);
   if (btn) btn.classList.add('selected');
+
   var bsBtn = document.getElementById('board-style-start-btn');
   if (bsBtn) {
-    bsBtn.disabled = false;
-    bsBtn.querySelector('.start-btn-text').textContent =
-      style === 'newstyle' ? 'Play New Style ◆' : 'Play Ordinary Style ⊞';
+    // For 4P + newstyle: forward to sub-selector; don't enable start btn yet
+    if (selectedPlayerCount === 4 && style === 'newstyle') {
+      bsBtn.disabled = false;
+      bsBtn.querySelector('.start-btn-text').textContent = 'Choose Shape →';
+    } else {
+      bsBtn.disabled = false;
+      bsBtn.querySelector('.start-btn-text').textContent =
+        style === 'newstyle' ? 'Play New Style ◆' : 'Play Ordinary Style ⊞';
+    }
   }
 }
 
 function confirmBoardStyleAndStart() {
   if (!selectedBoardStyle) return;
+  // 4P + New Style → show sub-selector for Hex/Ring/Diamond
+  if (selectedPlayerCount === 4 && selectedBoardStyle === 'newstyle') {
+    showScreen('ns4-style-screen');
+    return;
+  }
   boardStyleMode = selectedBoardStyle;
+  startGame();
+}
+
+/**
+ * Called from #ns4-style-screen when user selects one of the 3 shapes.
+ * Sets boardStyleMode and immediately starts the game.
+ */
+function selectNS4Style(style) {
+  // style: 'ns4-hex' | 'ns4-ring' | 'ns4-diamond'
+  boardStyleMode = style;
   startGame();
 }
 

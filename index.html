@@ -323,7 +323,56 @@
     </div>
   </div>
 
+  <!-- ═══ 4P New Style — Shape Selector Screen ═══ -->
+  <div id="ns4-style-screen" class="screen" role="main" aria-label="4-Player New Style Shape Selection">
+    <div class="setup-bg">
+      <div class="bg-orb orb-1"></div>
+      <div class="bg-orb orb-2"></div>
+      <div class="bg-orb orb-3"></div>
+      <div class="bg-orb orb-4"></div>
+    </div>
+    <div class="setup-content">
+      <div class="logo-area">
+        <h1 class="logo-title">👑 Raja<span class="logo-x">Chess</span></h1>
+        <p class="logo-tagline">4-Player New Style — Choose Board Shape</p>
+      </div>
+      <div class="setup-card">
+        <h2 class="setup-heading">🎮 Board Shape</h2>
+        <p class="setup-subheading">Choose a unique board geometry for your 4-player match</p>
+
+        <div class="mode-options ns4-style-options">
+          <button class="mode-btn ns4-style-btn" id="ns4-style-hex" onclick="selectNS4Style('ns4-hex')">
+            <div class="mode-btn-icon ns4-icon-hex">⬡</div>
+            <div class="mode-btn-body">
+              <span class="mode-btn-title">Style 1 — Hexagonal</span>
+              <span class="mode-btn-desc">6-sided hexagonal arena — 4 players converge from alternating sides toward the hex centre</span>
+            </div>
+          </button>
+          <button class="mode-btn ns4-style-btn" id="ns4-style-ring" onclick="selectNS4Style('ns4-ring')">
+            <div class="mode-btn-icon ns4-icon-ring">◎</div>
+            <div class="mode-btn-body">
+              <span class="mode-btn-title">Style 2 — Circular Ring</span>
+              <span class="mode-btn-desc">Concentric ring board with a hollow centre — 4 players positioned in each quadrant</span>
+            </div>
+          </button>
+          <button class="mode-btn ns4-style-btn" id="ns4-style-diamond" onclick="selectNS4Style('ns4-diamond')">
+            <div class="mode-btn-icon ns4-icon-diamond">◈</div>
+            <div class="mode-btn-body">
+              <span class="mode-btn-title">Style 3 — Diamond</span>
+              <span class="mode-btn-desc">Hollow diamond arena — 4 players at the cardinal corners facing the central void</span>
+            </div>
+          </button>
+        </div>
+
+        <div class="mode-actions">
+          <button class="menu-btn mode-back-btn" onclick="showScreen('board-style-screen')">← Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Shahi Khazana Store Screen ═══ -->
+
   <div id="store-screen" class="screen store-screen-wrapper" role="main" aria-label="Shahi Khazana Store">
     <div class="setup-bg">
       <div class="bg-orb orb-1"></div>
