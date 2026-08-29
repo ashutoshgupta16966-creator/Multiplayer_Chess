@@ -333,22 +333,28 @@ function renderPlayersList(activePlayers, currentId, eliminatedIds) {
       item.style.setProperty('--player-color', p.cssColor);
       item.style.setProperty('--player-rgb', p.cssRGB);
 
-      const statusText = isElim ? 'DISQUALIFIED' : isActive ? '▶' : '';
-      const badgeClass = isElim ? 'badge-elim' : isActive ? 'badge-active' : '';
-
-      item.innerHTML = `
-        <span class="player-color-dot" style="background:${p.cssColor}"></span>
-        <span class="player-name-text">${p.name}</span>
-        ${statusText ? `<span class="player-status-badge ${badgeClass}">${statusText}</span>` : ''}
-      `;
+      if (isActive) {
+        // Active Turn: Color circle on left + Team name + Active indicator
+        item.innerHTML = `
+          <span class="player-color-dot" style="background:${p.cssColor}"></span>
+          <span class="player-name-text">${p.name}</span>
+          <span class="player-status-badge badge-active">▶</span>
+        `;
+      } else {
+        // Inactive players: Only color circle on left (no text name)
+        const elimBadge = isElim ? '<span class="player-status-badge badge-elim">ELIM</span>' : '';
+        item.innerHTML = `
+          <span class="player-color-dot" style="background:${p.cssColor}"></span>
+          ${elimBadge}
+        `;
+      }
     } else {
+      // Inactive seat in 2P / 3P mode: Only dim color circle on left
       const def = PLAYER_DEFS[pid] || { name: pid, cssColor: '#555' };
       item.classList.add('inactive-slot');
       item.style.setProperty('--player-color', def.cssColor);
       item.innerHTML = `
         <span class="player-color-dot inactive-dot" style="background:${def.cssColor}; opacity:0.3;"></span>
-        <span class="player-name-text inactive-name" style="opacity:0.35;">${def.name}</span>
-        <span class="player-status-badge badge-off">OFF</span>
       `;
     }
     container.appendChild(item);
@@ -2543,9 +2549,13 @@ function startGame() {
   // ── Wire up click handling ───────────────────────────────────
   attachBoardClickHandler();
 
-  // ── Reset move log ───────────────────────────────────────────
+  // ── Reset move log & captured pieces ─────────────────────────
+  captureLog = [];
+  moveHistory = [];
+  movesWithoutProgress = 0;
+  updateCapturedArea();
   var logEl = document.getElementById('move-log');
-  logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
+  if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
 }
 
 function returnToMenu() {
@@ -2557,6 +2567,12 @@ function returnToMenu() {
   selectedBoardStyle = null;
   boardStyleMode = 'ordinary';
   aiPlayerIds = new Set();
+  moveHistory = [];
+  captureLog = [];
+  movesWithoutProgress = 0;
+  updateCapturedArea();
+  var logEl = document.getElementById('move-log');
+  if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
   playerBtns.forEach(btn => {
     btn.classList.remove('selected');
     btn.setAttribute('aria-pressed', 'false');
@@ -2624,6 +2640,7 @@ document.addEventListener('click', function () {
 }, { once: false });
 showScreen('setup-screen');
 initParticleCanvas();
+updateCapturedArea();
 
 /* ════════════════════════════════════════════════════════════
    GAME TIMER — Single unified implementation
