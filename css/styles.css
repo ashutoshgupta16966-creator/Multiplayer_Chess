@@ -62,6 +62,7 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 
 /* ── Screens ──────────────────────────────────────────────── */
