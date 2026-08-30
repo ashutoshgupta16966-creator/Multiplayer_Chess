@@ -592,14 +592,37 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/script.js"></script>
   <script>
-    /* ── PWA: Service Worker Registration ─────────────────── */
+    /* ── PWA: Service Worker Registration & Live Update Handling ── */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('sw.js').then(function (reg) {
           console.log('[RajaChess] ServiceWorker registered, scope:', reg.scope);
+          // Check for update immediately on load
+          reg.update();
         }).catch(function (err) {
           console.warn('[RajaChess] ServiceWorker registration failed:', err);
         });
+      });
+
+      // Check for SW update whenever the user re-focuses or opens the tab
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') {
+          navigator.serviceWorker.getRegistration().then(function (reg) {
+            if (reg) reg.update();
+          });
+        }
+      });
+
+      // When a newly activated SW claims control, reload cleanly if on setup screen
+      var swRefreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (!swRefreshing) {
+          swRefreshing = true;
+          var setupScr = document.getElementById('setup-screen');
+          if (setupScr && setupScr.classList.contains('active')) {
+            window.location.reload();
+          }
+        }
       });
     }
 

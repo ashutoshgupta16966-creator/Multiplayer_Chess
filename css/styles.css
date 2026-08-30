@@ -62,7 +62,22 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
+}
+
+/* ── Pull-to-refresh & overscroll containment (Active Gameplay ONLY) ── */
+html.gameplay-active,
+body.gameplay-active,
+body:has(#game-screen.active),
+#game-screen.active {
+  overscroll-behavior-y: contain !important;
+  overscroll-behavior: contain !important;
+}
+
+#game-screen.active .board-area,
+#game-screen.active .chess-board {
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 
 /* ── Screens ──────────────────────────────────────────────── */

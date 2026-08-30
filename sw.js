@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════
-   RajaChess — Service Worker (Cache-First + Offline)
-   Cache version: rajachess-v5
+   RajaChess — Service Worker (Network-First + Offline Fallback)
+   Cache version: rajachess-v6
    ═══════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'rajachess-v5';
+const CACHE_NAME = 'rajachess-v6';
 
-/* All core assets to pre-cache on install */
+/* Core assets to pre-cache on install */
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -15,73 +15,85 @@ const PRECACHE_ASSETS = [
   '/icon.png'
 ];
 
-/* ── Install: pre-cache all assets ─────────────────── */
+/* ── Install: pre-cache core assets & activate immediately ── */
 self.addEventListener('install', function (event) {
+  self.skipWaiting(); // Activate new service worker immediately
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(PRECACHE_ASSETS);
-    }).then(function () {
-      return self.skipWaiting(); // activate immediately
+    }).catch(function (err) {
+      console.warn('[SW] Pre-cache warning:', err);
     })
   );
 });
 
-/* ── Activate: purge old cache versions ─────────────── */
+/* ── Activate: purge all obsolete caches & claim clients ── */
 self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
       return Promise.all(
         cacheNames
           .filter(function (name) { return name !== CACHE_NAME; })
-          .map(function (name) { return caches.delete(name); })
+          .map(function (name) {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
       );
     }).then(function () {
-      return self.clients.claim(); // take control of all open tabs
+      return self.clients.claim(); // Take control of all clients immediately
     })
   );
 });
 
-/* ── Fetch: Cache-First strategy ────────────────────── */
+/* ── Message Listener for Manual Skip-Waiting ── */
+self.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+/* ── Fetch: Network-First strategy with Cache Fallback ── */
 self.addEventListener('fetch', function (event) {
   /* Only handle GET requests */
   if (event.request.method !== 'GET') return;
 
-  /* Skip cross-origin requests (fonts, etc.) — let them go to network */
   var url = new URL(event.request.url);
+
+  /* Skip cross-origin requests (fonts, external CDN, etc.) — let them pass */
   if (url.origin !== self.location.origin) {
     return;
   }
 
+  /* Network-First Strategy:
+     1. Try to fetch the latest response from network
+     2. If successful, update the cache and return network response
+     3. If offline / network fails, return cached response */
   event.respondWith(
-    caches.match(event.request).then(function (cachedResponse) {
-      /* Cache hit → return immediately */
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      /* Cache miss → fetch from network, cache the response */
-      return fetch(event.request).then(function (networkResponse) {
+    fetch(event.request)
+      .then(function (networkResponse) {
         if (
-          !networkResponse ||
-          networkResponse.status !== 200 ||
-          networkResponse.type === 'opaque'
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type !== 'opaque'
         ) {
-          return networkResponse;
+          var responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        /* Clone before consuming */
-        var responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then(function (cache) {
-          cache.put(event.request, responseToCache);
-        });
-
         return networkResponse;
-      }).catch(function () {
-        /* Offline fallback: serve index.html for navigation requests */
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
-    })
+      })
+      .catch(function () {
+        /* Network failed (offline): serve from cache */
+        return caches.match(event.request).then(function (cachedResponse) {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          /* Fallback for navigation requests */
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html') || caches.match('/');
+          }
+        });
+      })
   );
 });

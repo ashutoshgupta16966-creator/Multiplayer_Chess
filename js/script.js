@@ -1900,17 +1900,31 @@ playerBtns.forEach(btn => {
 });
 
 /* ════════════════════════════════════════════════════════════
-   SCREEN TRANSITIONS
+   SCREEN TRANSITIONS & SPA HISTORY ROUTING
    ════════════════════════════════════════════════════════════ */
-function showScreen(id) {
+function showScreen(id, pushHistory) {
+  if (pushHistory !== false) {
+    try {
+      if (!history.state || history.state.screen !== id) {
+        history.pushState({ screen: id }, '', '');
+      }
+    } catch (e) { }
+  }
+
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   var scr = document.getElementById(id);
   if (scr) scr.classList.add('active');
 
-  // Show HUD on main home/selection screens ONLY; hide completely during active gameplay
+  // Pull-to-refresh & HUD conditional visibility:
+  // ONLY active gameplay screen disables pull-to-refresh (gameplay-active).
+  // Home, setup, mode, style, and store screens keep pull-to-refresh enabled.
   if (id === 'game-screen') {
+    document.documentElement.classList.add('gameplay-active');
+    document.body.classList.add('gameplay-active');
     document.body.classList.remove('show-hud');
   } else {
+    document.documentElement.classList.remove('gameplay-active');
+    document.body.classList.remove('gameplay-active');
     document.body.classList.add('show-hud');
   }
 
@@ -2613,8 +2627,8 @@ function startGame() {
   if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
 }
 
-function returnToMenu() {
-  showScreen('setup-screen');
+function returnToMenu(pushHistory) {
+  showScreen('setup-screen', pushHistory);
   resetGameTimer();
   selectedPlayerCount = null;
   selectedMode = null;
@@ -2635,6 +2649,43 @@ function returnToMenu() {
   startBtn.disabled = true;
   startBtnText.textContent = 'Select player count first';
 }
+
+/* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
+window.addEventListener('popstate', function (e) {
+  // 1. Close any open overlays/modals first
+  var statsModal = document.getElementById('stats-modal');
+  if (statsModal && statsModal.classList.contains('active')) {
+    closeStatsModal();
+    return;
+  }
+  var victoryModal = document.getElementById('victory-modal');
+  if (victoryModal && victoryModal.classList.contains('active')) {
+    victoryModal.classList.remove('active');
+    stopConfetti();
+    returnToMenu(false);
+    return;
+  }
+  var checkmateModal = document.getElementById('checkmate-modal');
+  if (checkmateModal && checkmateModal.classList.contains('active')) {
+    checkmateModal.classList.remove('active');
+    returnToMenu(false);
+    return;
+  }
+
+  // 2. Determine target screen from history state
+  var targetScreen = (e.state && e.state.screen) ? e.state.screen : 'setup-screen';
+  var currentScreenEl = document.querySelector('.screen.active');
+  var currentScreenId = currentScreenEl ? currentScreenEl.id : '';
+
+  if (currentScreenId === 'game-screen' && targetScreen !== 'game-screen') {
+    returnToMenu(false);
+    if (targetScreen !== 'setup-screen') {
+      showScreen(targetScreen, false);
+    }
+  } else {
+    showScreen(targetScreen, false);
+  }
+});
 
 startBtn.addEventListener('click', function () {
   if (!selectedPlayerCount) return;
@@ -2693,7 +2744,14 @@ if (typeof SoundManager !== 'undefined') {
 document.addEventListener('click', function () {
   if (typeof SoundManager !== 'undefined') SoundManager.initCtx();
 }, { once: false });
-showScreen('setup-screen');
+
+try {
+  if (!history.state || !history.state.screen) {
+    history.replaceState({ screen: 'setup-screen' }, '', '');
+  }
+} catch (e) { }
+
+showScreen('setup-screen', false);
 initParticleCanvas();
 updateCapturedArea();
 
