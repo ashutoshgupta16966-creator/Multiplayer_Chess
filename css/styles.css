@@ -705,6 +705,11 @@ body:has(#game-screen.active),
   border-right: 1px solid var(--border);
   width: 220px;
   flex-shrink: 0;
+  /* Prevent panel from growing beyond viewport and causing board shifts */
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .panel-right {
@@ -868,12 +873,29 @@ body:has(#game-screen.active),
 .captured-area {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-height: 80px;
-  max-height: 180px;
+  gap: 8px;
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+.captured-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.captured-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.captured-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
 .captured-row {
@@ -903,17 +925,23 @@ body:has(#game-screen.active),
   flex-direction: column;
   gap: 10px;
   min-height: 0;
+  overflow: hidden;
 }
 
 .move-log {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 260px;
+  height: 280px;
+  min-height: 280px;
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
 }
 
 .move-log::-webkit-scrollbar {
@@ -1417,6 +1445,7 @@ body:has(#game-screen.active),
     padding: 8px 4px;
     height: auto;
     overflow: visible;
+    flex-shrink: 0;
   }
 
   .chess-board {
@@ -1430,23 +1459,35 @@ body:has(#game-screen.active),
     margin-bottom: 6px;
   }
 
-  /* Right panel → info section below board */
+  /* Right panel → info section below board with rigid fixed height */
   .panel-right {
     order: 3;
     flex-direction: column;
     border-top: 1px solid var(--border);
     padding: 12px 14px;
+    flex-shrink: 0;
+    overflow: hidden;
   }
 
   .captured-area {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-    min-height: 30px;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
   }
 
   .move-log {
-    max-height: 120px;
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
   }
 
   /* Setup / mode screens */
@@ -3385,14 +3426,19 @@ body:not(.show-hud) .points-hud,
   background: var(--bg-card) !important;
   border-left: 1px solid var(--border) !important;
   border-right: none !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
 }
 
 .bottom-panel-col {
-  flex: 1 !important;
+  flex: 1 1 0% !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
   min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }
 
 .captured-col {
@@ -3404,23 +3450,39 @@ body:not(.show-hud) .points-hud,
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
-  flex: 1 !important;
+  height: 280px !important;
+  min-height: 280px !important;
   max-height: 280px !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border) transparent !important;
+  overscroll-behavior: contain !important;
+  box-sizing: border-box !important;
 }
 
 .move-log-section {
-  flex: 1 !important;
+  flex: 1 1 0% !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
   min-height: 0 !important;
+  overflow: hidden !important;
 }
 
 .move-log {
-  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  height: 280px !important;
+  min-height: 280px !important;
   max-height: 280px !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border) transparent !important;
+  overscroll-behavior: contain !important;
+  box-sizing: border-box !important;
 }
 
 @media (max-width: 800px) {
@@ -3428,6 +3490,25 @@ body:not(.show-hud) .points-hud,
     width: 100% !important;
     border-left: none !important;
     border-top: 1px solid var(--border) !important;
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
+    flex-shrink: 0 !important;
+    padding: 10px 14px !important;
+    gap: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .captured-area {
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
+  }
+
+  .move-log {
+    height: 110px !important;
+    min-height: 110px !important;
+    max-height: 110px !important;
   }
 }
 
