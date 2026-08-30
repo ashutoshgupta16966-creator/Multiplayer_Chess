@@ -341,25 +341,25 @@
         <p class="setup-subheading">Choose a unique board geometry for your 4-player match</p>
 
         <div class="mode-options ns4-style-options">
-          <button class="mode-btn ns4-style-btn" id="ns4-style-hex" onclick="selectNS4Style('ns4-hex')">
-            <div class="mode-btn-icon ns4-icon-hex">⬡</div>
+          <button class="mode-btn ns4-style-btn" id="ns4-style-octagonal" onclick="selectNS4Style('ns4-octagonal')">
+            <div class="mode-btn-icon ns4-icon-octagonal">⯃</div>
             <div class="mode-btn-body">
-              <span class="mode-btn-title">Style 1 — Hexagonal</span>
-              <span class="mode-btn-desc">6-sided hexagonal arena — 4 players converge from alternating sides toward the hex centre</span>
-            </div>
-          </button>
-          <button class="mode-btn ns4-style-btn" id="ns4-style-ring" onclick="selectNS4Style('ns4-ring')">
-            <div class="mode-btn-icon ns4-icon-ring">◎</div>
-            <div class="mode-btn-body">
-              <span class="mode-btn-title">Style 2 — Circular Ring</span>
-              <span class="mode-btn-desc">Concentric ring board with a hollow centre — 4 players positioned in each quadrant</span>
+              <span class="mode-btn-title">Style 1 — Octagonal Chess Lock</span>
+              <span class="mode-btn-desc">8-sided symmetrical octagonal arena with 4 players on primary edges facing inwards</span>
             </div>
           </button>
           <button class="mode-btn ns4-style-btn" id="ns4-style-diamond" onclick="selectNS4Style('ns4-diamond')">
             <div class="mode-btn-icon ns4-icon-diamond">◈</div>
             <div class="mode-btn-body">
-              <span class="mode-btn-title">Style 3 — Diamond</span>
-              <span class="mode-btn-desc">Hollow diamond arena — 4 players at the cardinal corners facing the central void</span>
+              <span class="mode-btn-title">Style 2 — Diamond Chess Lock</span>
+              <span class="mode-btn-desc">4 diamond-shaped corner arms facing a genuine hollow diamond center void</span>
+            </div>
+          </button>
+          <button class="mode-btn ns4-style-btn" id="ns4-style-circular" onclick="selectNS4Style('ns4-circular')">
+            <div class="mode-btn-icon ns4-icon-circular">◎</div>
+            <div class="mode-btn-body">
+              <span class="mode-btn-title">Style 3 — Circular Chess Lock</span>
+              <span class="mode-btn-desc">Concentric circular ring board with 4 quadrants surrounding a genuine hollow center hole</span>
             </div>
           </button>
         </div>
@@ -478,7 +478,21 @@
         </div>
 
         <div id="chess-board" class="chess-board" role="grid" aria-label="14x14 chess board"></div>
+        <!-- SVG overlay draws the outer board shape boundary on top without blocking pointer events -->
+        <svg id="board-shape-overlay" class="board-shape-overlay" aria-hidden="true" pointer-events="none">
+          <defs>
+            <filter id="board-glow-gold">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+            <filter id="board-glow-cyan">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+        </svg>
       </main>
+
 
       <!-- Right / Bottom Panel (2-column side-by-side flex layout) -->
       <aside class="panel panel-right bottom-panel-side-by-side" aria-label="Captured pieces and move history">

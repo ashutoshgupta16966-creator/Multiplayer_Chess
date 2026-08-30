@@ -21,11 +21,58 @@ function isValidCell(row, col) {
   if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
 
   if (BOARD_SIZE === 14) {
-    // 4 Corner void blocks outside the cross / battleground
-    if (row <= 2 && col <= 2) return false; // top-left
-    if (row <= 2 && col >= 11) return false; // top-right
-    if (row >= 11 && col <= 2) return false; // bottom-left
-    if (row >= 11 && col >= 11) return false; // bottom-right
+
+    // ── 4P Style 1: OCTAGONAL CHESS LOCK ───────────────────────
+    // 8-sided octagonal boundary with truncated corners.
+    // Each side = 8 squares, diagonal cuts = 3 squares each corner.
+    if (boardStyleMode === 'ns4-octagonal' || boardStyleMode === 'newstyle') {
+      // Cut top-left diagonal
+      if (row + col < 3) return false;
+      // Cut top-right diagonal
+      if (row - col > 10) return false;   // row + (13-col) < 3 → row - col > 10
+      // Cut bottom-left diagonal
+      if (col - row > 10) return false;   // (13-row) + col < 3 → col - row > 10
+      // Cut bottom-right diagonal
+      if (row + col > 23) return false;   // (13-row) + (13-col) < 3 → row+col > 23
+      return true;
+    }
+
+    // ── 4P Style 2: DIAMOND CHESS LOCK ─────────────────────────
+    // 4 diamond-arm quadrants extending from the 4 sides of the 14×14 grid.
+    // Each arm is a triangular wedge. There is a genuine hollow diamond void
+    // at the centre with Manhattan radius 3.5 from centre (6.5, 6.5).
+    if (boardStyleMode === 'ns4-diamond') {
+      var cr = row - 6.5;
+      var cc = col - 6.5;
+      var manhattan = Math.abs(cr) + Math.abs(cc);
+      // Central diamond void: strictly inside (non-inclusive) radius 4.0
+      if (manhattan < 4.0) return false;
+      // Outer boundary: must not exceed radius 13.5 (full grid is ~13.5 max)
+      if (manhattan > 13.5) return false;
+      // Quadrant arm: the cell must be in one of the 4 triangular directions.
+      // A cell is in a quadrant arm if abs(cr) > abs(cc) (top/bottom arm)
+      // or abs(cc) > abs(cr) (left/right arm).
+      // This means cells on the exact diagonals (abs(cr)==abs(cc)) are excluded.
+      if (Math.abs(cr) === Math.abs(cc)) return false;
+      return true;
+    }
+
+    // ── 4P Style 3: CIRCULAR CHESS LOCK ─────────────────────────
+    // Annular ring (doughnut): hollow circle centre, circular outer boundary.
+    // Inner radius void = 2.5 cells from centre, outer = 7.4 cells.
+    // Outer radius 7.4 covers piece starting positions at rows/cols 0,13.
+    if (boardStyleMode === 'ns4-circular') {
+      var dr = row - 6.5;
+      var dc = col - 6.5;
+      var dist = Math.sqrt(dr * dr + dc * dc);
+      return dist >= 2.5 && dist <= 7.4;
+    }
+
+    // ── Standard Ordinary cross-shaped board ────────────────────
+    if (row <= 2 && col <= 2) return false;
+    if (row <= 2 && col >= 11) return false;
+    if (row >= 11 && col <= 2) return false;
+    if (row >= 11 && col >= 11) return false;
   }
   return true;
 }
@@ -209,19 +256,21 @@ function renderBoard(activePlayerIds) {
     boardEl.setAttribute('aria-label', '14x14 chess board');
   }
 
-  // Apply / remove NS4 shape classes
-  var ns4Classes = ['style-ns4-hex', 'style-ns4-ring', 'style-ns4-diamond', 'style-newstyle'];
-  ns4Classes.forEach(function (cls) { boardEl.classList.remove(cls); });
-  if (boardStyleMode === 'ns4-hex') boardEl.classList.add('style-ns4-hex');
-  else if (boardStyleMode === 'ns4-ring') boardEl.classList.add('style-ns4-ring');
+  // Apply / remove NS4 shape classes (cleared first)
+  var allNS4Classes = [
+    'style-ns4-hex', 'style-ns4-ring', 'style-ns4-diamond',
+    'style-ns4-octagonal', 'style-ns4-circular', 'style-newstyle'
+  ];
+  allNS4Classes.forEach(function (cls) { boardEl.classList.remove(cls); });
+  if (boardStyleMode === 'ns4-octagonal') boardEl.classList.add('style-ns4-octagonal');
+  else if (boardStyleMode === 'newstyle') boardEl.classList.add('style-ns4-octagonal'); // 3P also octagonal
   else if (boardStyleMode === 'ns4-diamond') boardEl.classList.add('style-ns4-diamond');
-  else if (boardStyleMode === 'newstyle') boardEl.classList.add('style-newstyle');
+  else if (boardStyleMode === 'ns4-circular') boardEl.classList.add('style-ns4-circular');
 
   const seatZoneMap = { red: 'bottom', yellow: 'top', green: 'left', blue: 'right' };
   activeZonesSet = new Set(activePlayerIds.map(p => seatZoneMap[p]).filter(Boolean));
 
   // Ensure CSS grid templates are not overridden dynamically
-
   boardEl.style.gridTemplateRows = '';
   boardEl.style.gridTemplateColumns = '';
 
@@ -263,6 +312,143 @@ function renderBoard(activePlayerIds) {
       boardEl.appendChild(cell);
       cellEls[row][col] = cell;
     }
+  }
+
+  // After all cells rendered, update the visual shape overlay
+  updateBoardShapeOverlay();
+}
+
+/**
+ * Updates the SVG #board-shape-overlay to draw the exact outer boundary
+ * matching the reference Chess Lock images, without clipping pointer events.
+ */
+function updateBoardShapeOverlay() {
+  var svg = document.getElementById('board-shape-overlay');
+  if (!svg) return;
+
+  // Clear previous overlay content (keep <defs>)
+  var defs = svg.querySelector('defs');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (defs) svg.appendChild(defs);
+
+  var boardEl = document.getElementById('chess-board');
+  if (!boardEl) return;
+
+  // Hide overlay for normal modes
+  if (boardStyleMode === 'ordinary' || BOARD_SIZE === 8) {
+    svg.style.display = 'none';
+    return;
+  }
+
+  svg.style.display = 'block';
+
+  // Match the overlay exactly to the chess-board element position
+  var rect = boardEl.getBoundingClientRect();
+  var parentRect = boardEl.parentElement.getBoundingClientRect();
+  var x = rect.left - parentRect.left;
+  var y = rect.top - parentRect.top;
+  var W = rect.width;
+  var H = rect.height;
+
+  svg.setAttribute('width', parentRect.width);
+  svg.setAttribute('height', parentRect.height);
+  svg.style.position = 'absolute';
+  svg.style.top = '0';
+  svg.style.left = '0';
+  svg.style.pointerEvents = 'none';
+  svg.style.zIndex = '2';
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+
+  if (boardStyleMode === 'ns4-octagonal' || boardStyleMode === 'newstyle') {
+    // 8-sided octagon: corners cut = 3/14 of board width
+    var cut = W * (3 / 14);
+    var cutH = H * (3 / 14);
+    // Draw octagon stroke outline on top
+    var poly = document.createElementNS(svgNS, 'polygon');
+    var pts = [
+      (x + cut) + ',' + y,
+      (x + W - cut) + ',' + y,
+      (x + W) + ',' + (y + cutH),
+      (x + W) + ',' + (y + H - cutH),
+      (x + W - cut) + ',' + (y + H),
+      (x + cut) + ',' + (y + H),
+      x + ',' + (y + H - cutH),
+      x + ',' + (y + cutH)
+    ].join(' ');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', 'rgba(240,192,64,0.9)');
+    poly.setAttribute('stroke-width', '3');
+    svg.appendChild(poly);
+
+    // Corner fill (mask the outer triangular corner voids with bg colour)
+    var bgColor = '#09081a';
+    var corners = [
+      // top-left triangle
+      [x + ',' + y, (x + cut) + ',' + y, x + ',' + (y + cutH)],
+      // top-right triangle
+      [(x + W - cut) + ',' + y, (x + W) + ',' + y, (x + W) + ',' + (y + cutH)],
+      // bottom-left triangle
+      [x + ',' + (y + H - cutH), (x + cut) + ',' + (y + H), x + ',' + (y + H)],
+      // bottom-right triangle
+      [(x + W) + ',' + (y + H - cutH), (x + W - cut) + ',' + (y + H), (x + W) + ',' + (y + H)]
+    ];
+    corners.forEach(function(pts3) {
+      var tri = document.createElementNS(svgNS, 'polygon');
+      tri.setAttribute('points', pts3.join(' '));
+      tri.setAttribute('fill', bgColor);
+      tri.setAttribute('stroke', 'none');
+      svg.appendChild(tri);
+    });
+
+  } else if (boardStyleMode === 'ns4-diamond') {
+    // Diamond Chess Lock: draw 4 glowing corner block outlines + a diamond void in centre
+    // The void is a diamond shape centred on the board
+    var cx = x + W / 2;
+    var cy = y + H / 2;
+    // Diamond void: half-size = 2.5/14 of board
+    var dHalf = W * (3.5 / 14);
+    // Draw the central diamond void with dark fill
+    var diamond = document.createElementNS(svgNS, 'polygon');
+    var dPts = [
+      cx + ',' + (cy - dHalf),
+      (cx + dHalf) + ',' + cy,
+      cx + ',' + (cy + dHalf),
+      (cx - dHalf) + ',' + cy
+    ].join(' ');
+    diamond.setAttribute('points', dPts);
+    diamond.setAttribute('fill', '#09081a');
+    diamond.setAttribute('stroke', 'rgba(245,158,11,0.7)');
+    diamond.setAttribute('stroke-width', '3');
+    svg.appendChild(diamond);
+
+  } else if (boardStyleMode === 'ns4-circular') {
+    // Circular Chess Lock: draw inner circle void + outer circle stroke
+    var cx2 = x + W / 2;
+    var cy2 = y + H / 2;
+    var outerR = W * (7.4 / 14);   // matches isValidCell outer radius 7.4
+    var innerR = W * (2.5 / 14);   // matches isValidCell inner void radius 2.5
+
+    // Inner circle fill (the hollow void)
+    var innerCircle = document.createElementNS(svgNS, 'circle');
+    innerCircle.setAttribute('cx', cx2);
+    innerCircle.setAttribute('cy', cy2);
+    innerCircle.setAttribute('r', innerR);
+    innerCircle.setAttribute('fill', '#09081a');
+    innerCircle.setAttribute('stroke', 'rgba(56,189,248,0.7)');
+    innerCircle.setAttribute('stroke-width', '3');
+    svg.appendChild(innerCircle);
+
+    // Outer circle stroke boundary
+    var outerCircle = document.createElementNS(svgNS, 'circle');
+    outerCircle.setAttribute('cx', cx2);
+    outerCircle.setAttribute('cy', cy2);
+    outerCircle.setAttribute('r', outerR);
+    outerCircle.setAttribute('fill', 'none');
+    outerCircle.setAttribute('stroke', 'rgba(56,189,248,0.9)');
+    outerCircle.setAttribute('stroke-width', '3');
+    svg.appendChild(outerCircle);
   }
 }
 
@@ -1843,10 +2029,10 @@ function confirmBoardStyleAndStart() {
 
 /**
  * Called from #ns4-style-screen when user selects one of the 3 shapes.
+ * style: 'ns4-octagonal' | 'ns4-diamond' | 'ns4-circular'
  * Sets boardStyleMode and immediately starts the game.
  */
 function selectNS4Style(style) {
-  // style: 'ns4-hex' | 'ns4-ring' | 'ns4-diamond'
   boardStyleMode = style;
   startGame();
 }

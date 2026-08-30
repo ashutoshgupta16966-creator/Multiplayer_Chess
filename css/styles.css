@@ -1031,6 +1031,16 @@ body:has(#game-screen.active),
   user-select: none;
 }
 
+/* SVG overlay for NS4 shapes — positioned over .board-area, above board cells */
+.board-shape-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 3;
+  display: none; /* shown by JS for NS4 modes */
+}
+
 .chess-board {
   position: relative;
   z-index: 1;
@@ -3423,34 +3433,68 @@ body:not(.show-hud) .points-hud,
 
 /* ════════════════════════════════════════════════════════════
    NEW STYLE BOARD GEOMETRIES & SHAPE VARIANTS
+   Reference-image matched: Octagonal / Diamond / Circular Chess Lock
    ════════════════════════════════════════════════════════════ */
 
-/* ── 3P & 4P: Octagonal Board (8-sided Gold Theme) ── */
-.chess-board.style-newstyle {
-  border-radius: 16px !important;
-  border: 2.5px solid var(--gold-400) !important;
-  box-shadow: 0 0 25px rgba(240, 192, 64, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+/* ══ Common: invalid cells in New Style modes are invisible (pure void) ══ */
+.chess-board.style-ns4-octagonal .cell.invalid,
+.chess-board.style-ns4-diamond .cell.invalid,
+.chess-board.style-ns4-circular .cell.invalid {
+  background: transparent !important;
+  pointer-events: none !important;
+  border-radius: 0 !important;
 }
 
-/* ── 4P Style 1: Hexagonal Board (6-sided Purple Theme) ── */
-.chess-board.style-ns4-hex {
-  border-radius: 20px !important;
-  border: 2.5px solid #a855f7 !important;
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+.chess-board.style-ns4-octagonal .cell.invalid::before,
+.chess-board.style-ns4-octagonal .cell.invalid::after,
+.chess-board.style-ns4-diamond .cell.invalid::before,
+.chess-board.style-ns4-diamond .cell.invalid::after,
+.chess-board.style-ns4-circular .cell.invalid::before,
+.chess-board.style-ns4-circular .cell.invalid::after {
+  display: none !important;
+  content: none !important;
 }
 
-/* ── 4P Style 2: Circular Ring Board (Sky Cyan Theme) ── */
-.chess-board.style-ns4-ring {
-  border-radius: 28px !important;
-  border: 2.5px solid #38bdf8 !important;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+/* ── Style 1: OCTAGONAL CHESS LOCK ── */
+/* Visual shape drawn by #board-shape-overlay SVG (no clip-path so clicks work).
+   Invalid corner cells are transparent so the SVG overlay triangle fills show through. */
+.chess-board.style-ns4-octagonal {
+  border: none !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
-/* ── 4P Style 3: Diamond Board (Amber Glow Theme) ── */
+/* ── Style 2: DIAMOND CHESS LOCK ── */
+/* 4 isolated corner quadrant boards with a genuine void centre.
+   Transparent background + transparent invalid cells = the dark page background
+   shows through the void. SVG overlay draws the central diamond ring. */
 .chess-board.style-ns4-diamond {
-  border-radius: 18px !important;
-  border: 2.5px solid #f59e0b !important;
-  box-shadow: 0 0 25px rgba(245, 158, 11, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+/* Each valid corner cell gets normal chess board background */
+.chess-board.style-ns4-diamond .cell.light {
+  background: var(--cell-light) !important;
+  border-radius: 1px !important;
+}
+
+.chess-board.style-ns4-diamond .cell.dark {
+  background: var(--cell-dark) !important;
+  border-radius: 1px !important;
+}
+
+/* ── Style 3: CIRCULAR CHESS LOCK ── */
+/* No clip-path — SVG overlay draws inner void circle + outer boundary ring.
+   Invalid centre cells are transparent; ring cells show normal board colours. */
+.chess-board.style-ns4-circular {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+  background: transparent !important;
 }
 
 /* ── 4P New Style Sub-Selector Screen ── */
@@ -3487,7 +3531,9 @@ body:not(.show-hud) .points-hud,
 
 .ns4-icon-hex,
 .ns4-icon-ring,
-.ns4-icon-diamond {
+.ns4-icon-diamond,
+.ns4-icon-octagonal,
+.ns4-icon-circular {
   font-size: 1.8rem;
   color: var(--gold-400);
   flex-shrink: 0;
