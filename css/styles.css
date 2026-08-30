@@ -40,9 +40,11 @@
   /* Board */
   --cell-light: #d4c5a0;
   --cell-dark: #7a6240;
-  /* Cell size: fit the board (14 cells + gap/border) inside board-area safely.
-     Left Panel (260px) + Right Panel (380px) + margins/padding (80px) = 720px overhead */
-  --cell-size: clamp(20px, min(calc((100vw - 720px) / 14), calc((100vh - 140px) / 14)), 52px);
+  /* Cell size: fit the board into board-area with zero wasted space.
+     Horizontal: 100vw minus two side panels (220px each) minus padding/borders (~60px)
+     Vertical:   100vh minus board-area padding only (~16px top+bottom)
+     No artificial max cap — board fills all available space. */
+  --cell-size: min(calc((100vw - 500px) / 14), calc((100vh - 16px) / 14));
   --board-gap: 1px;
 
   /* Misc */
@@ -1024,7 +1026,7 @@ body:has(#game-screen.active),
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(8px, 1.8vw, 24px);
+  padding: 8px;
   overflow: visible;
   position: relative;
   min-width: 0;
@@ -1366,7 +1368,8 @@ body:has(#game-screen.active),
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1100px) {
   :root {
-    --cell-size: clamp(18px, min(calc((100vw - 440px) / 14), calc((100vh - 120px) / 14)), 42px);
+    /* Panels shrink to 180px each; recalculate: 100vw - 360px panels - 60px other = 100vw - 420px */
+    --cell-size: min(calc((100vw - 420px) / 14), calc((100vh - 16px) / 14));
   }
 
   .panel {
@@ -1377,21 +1380,24 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Large crisp board filling full screen width with zero wasted gaps */
-    --cell-size: clamp(23px, calc((100vw - 8px) / 14), 48px);
+    /* Mobile: panels stack above/below board.
+       Width axis:  100vw - 8px side margins
+       Height axis: 100svh minus top control strip (~56px) minus bottom panel (~230px) minus padding (~8px)
+       Board fills whichever dimension is smaller — zero wasted space in both directions. */
+    --cell-size: min(calc((100vw - 8px) / 14), calc((100svh - 294px) / 14));
   }
 
-  /* Game screen scrolls vertically on mobile */
+  /* Game screen fixed to viewport height so flex children fill it correctly */
   #game-screen {
-    height: auto;
+    height: 100svh;
     min-height: 100svh;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   .game-layout {
     flex-direction: column;
-    height: auto;
-    overflow: visible;
+    height: 100svh;
+    overflow: hidden;
   }
 
   /* Panels become full-width horizontal/vertical strips */
@@ -1497,23 +1503,28 @@ body:has(#game-screen.active),
     font-size: 0.70rem;
   }
 
-  /* Board area — maximized to fill space without blank gaps */
+  /* Board area — flex-grow fills all vertical space between top strip and bottom panel */
   .board-area {
     order: 2;
     padding: 4px 2px !important;
-    height: auto;
+    flex: 1 0 auto;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     overflow: visible;
-    flex-shrink: 0;
+    min-height: 0;
   }
 
   .chess-board {
     margin: 0 auto;
+    flex-shrink: 0;
   }
 
-  /* 2-Player 8x8 Board enlarged to fill width & height on mobile */
+  /* 2-Player 8x8 Board: fill both width and height on mobile */
   .chess-board.mode-2p {
-    grid-template-columns: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
-    grid-template-rows: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
+    --cell-size-2p: min(calc((100vw - 8px) / 8), calc((100svh - 330px) / 8));
+    grid-template-columns: repeat(8, var(--cell-size-2p)) !important;
+    grid-template-rows: repeat(8, var(--cell-size-2p)) !important;
   }
 
   /* In-game board timer — visible on mobile below banners */
@@ -1523,7 +1534,7 @@ body:has(#game-screen.active),
     margin-bottom: 4px;
   }
 
-  /* Right panel → info section below board with compact fixed height */
+  /* Right panel → fixed height bottom strip (height kept in sync with cell-size formula: ~250px) */
   .panel-right {
     order: 3;
     flex-direction: column;
@@ -1531,24 +1542,25 @@ body:has(#game-screen.active),
     padding: 8px 12px;
     flex-shrink: 0;
     overflow: hidden;
+    max-height: 250px;
   }
 
   .captured-area {
     flex-direction: column !important;
     flex-wrap: nowrap !important;
-    gap: 6px !important;
-    height: 110px !important;
-    min-height: 110px !important;
-    max-height: 110px !important;
+    gap: 4px !important;
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior: contain !important;
   }
 
   .move-log {
-    height: 110px !important;
-    min-height: 110px !important;
-    max-height: 110px !important;
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior: contain !important;
