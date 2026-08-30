@@ -20,35 +20,8 @@ var activeZonesSet = new Set();
 function isValidCell(row, col) {
   if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return false;
 
-  // ── 3P & 4P New Style — Octagonal 8-sided mask ─────────────
-  if (boardStyleMode === 'newstyle' && BOARD_SIZE === 14) {
-    return (Math.abs(row - 6.5) + Math.abs(col - 6.5)) <= 10;
-  }
-
-  // ── 4P New Style: Style 1 — Hexagonal mask ──────────────────
-  if (boardStyleMode === 'ns4-hex' && BOARD_SIZE === 14) {
-    var hq = col - 6.5;
-    var hr = row - 6.5;
-    var hs = -hq - hr;
-    var hexDist = Math.max(Math.abs(hq), Math.abs(hr), Math.abs(hs));
-    return hexDist <= 6.8;
-  }
-
-  // ── 4P New Style: Style 2 — Circular Ring mask ──────────────
-  if (boardStyleMode === 'ns4-ring' && BOARD_SIZE === 14) {
-    var dr = row - 6.5;
-    var dc = col - 6.5;
-    var dist = Math.sqrt(dr * dr + dc * dc);
-    return dist >= 2.2 && dist <= 7.5;
-  }
-
-  // ── 4P New Style: Style 3 — Hollow Diamond mask ─────────────
-  if (boardStyleMode === 'ns4-diamond' && BOARD_SIZE === 14) {
-    var manhattan = Math.abs(row - 6.5) + Math.abs(col - 6.5);
-    return manhattan <= 10 && manhattan > 2.5;
-  }
-
   if (BOARD_SIZE === 14) {
+    // 4 Corner void blocks outside the cross / battleground
     if (row <= 2 && col <= 2) return false; // top-left
     if (row <= 2 && col >= 11) return false; // top-right
     if (row >= 11 && col <= 2) return false; // bottom-left

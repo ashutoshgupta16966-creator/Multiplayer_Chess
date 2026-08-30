@@ -40,9 +40,9 @@
   /* Board */
   --cell-light: #d4c5a0;
   --cell-dark: #7a6240;
-  /* Cell size: fit the board (14 cells + gap/border) inside board-area.
-     Panels = 440px, board-area padding = 48px, board overhead = 19px */
-  --cell-size: clamp(26px, min(calc((100vw - 507px) / 14), calc((100vh - 100px) / 14)), 58px);
+  /* Cell size: fit the board (14 cells + gap/border) inside board-area safely.
+     Left Panel (260px) + Right Panel (380px) + margins/padding (80px) = 720px overhead */
+  --cell-size: clamp(20px, min(calc((100vw - 720px) / 14), calc((100vh - 140px) / 14)), 52px);
   --board-gap: 1px;
 
   /* Misc */
@@ -983,9 +983,11 @@ body:has(#game-screen.active),
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  overflow: hidden;
+  padding: clamp(8px, 1.8vw, 24px);
+  overflow: visible;
   position: relative;
+  min-width: 0;
+  min-height: 0;
   /* Chess-themed background: center spotlight + large checkerboard pattern */
   background-color: #09081a;
   background-image:
@@ -1047,6 +1049,8 @@ body:has(#game-screen.active),
   background: linear-gradient(145deg, #2a1f0a, #1e1505);
   padding: var(--board-gap);
   outline: none;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Individual cells */
@@ -1310,10 +1314,8 @@ body:has(#game-screen.active),
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1100px) {
-
-  /* Panels shrink to 180px: overhead = 360 + 48 + 19 = 427px */
   :root {
-    --cell-size: clamp(22px, min(calc((100vw - 427px) / 14), calc((100vh - 100px) / 14)), 44px);
+    --cell-size: clamp(18px, min(calc((100vw - 440px) / 14), calc((100vh - 120px) / 14)), 42px);
   }
 
   .panel {
@@ -1324,8 +1326,8 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Crisp board that fills the full phone width with no clipping */
-    --cell-size: clamp(20px, calc((100vw - 16px) / 14), 36px);
+    /* Crisp board that fills the full phone width with safe margin and zero clipping */
+    --cell-size: clamp(18px, min(calc((100vw - 20px) / 14), calc((100vh - 280px) / 14)), 36px);
   }
 
   /* Game screen scrolls vertically on mobile */
@@ -1539,15 +1541,17 @@ body:has(#game-screen.active),
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: auto;
-  margin-bottom: -10px;
+  gap: 6px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  margin-left: auto;
+  align-self: flex-end;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  font-size: 0.8rem;
+  padding: 6px 12px;
+  font-size: 0.73rem;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: var(--transition);
@@ -3244,7 +3248,6 @@ body:not(.show-hud) .points-hud,
 
 /* High-Contrast Golden Bordered Glowing Action Buttons */
 .golden-action-btn,
-#undo-btn,
 #back-to-menu-btn {
   background: linear-gradient(135deg, rgba(240, 192, 64, 0.22), rgba(212, 137, 26, 0.22)) !important;
   border: 1.5px solid var(--gold-400) !important;
@@ -3254,6 +3257,33 @@ body:not(.show-hud) .points-hud,
   box-shadow: 0 0 14px rgba(240, 192, 64, 0.35), inset 0 0 8px rgba(240, 192, 64, 0.15) !important;
   transition: all 0.2s ease !important;
   border-radius: var(--radius-sm) !important;
+}
+
+/* Compact, Right-Shifted Undo Button */
+#undo-btn {
+  background: linear-gradient(135deg, rgba(240, 192, 64, 0.22), rgba(212, 137, 26, 0.22)) !important;
+  border: 1.5px solid var(--gold-400) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 0 14px rgba(240, 192, 64, 0.35), inset 0 0 8px rgba(240, 192, 64, 0.15) !important;
+  transition: all 0.2s ease !important;
+  border-radius: var(--radius-sm) !important;
+  align-self: flex-end !important;
+  width: auto !important;
+  margin-top: 10px !important;
+  margin-bottom: 6px !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  padding: 6px 12px !important;
+  font-size: 0.73rem !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
+}
+
+#undo-btn svg {
+  width: 13px !important;
+  height: 13px !important;
 }
 
 .golden-action-btn:hover:not(:disabled),
@@ -3395,28 +3425,32 @@ body:not(.show-hud) .points-hud,
    NEW STYLE BOARD GEOMETRIES & SHAPE VARIANTS
    ════════════════════════════════════════════════════════════ */
 
-/* ── 3P & 4P: Octagonal Board (8-sided) ── */
+/* ── 3P & 4P: Octagonal Board (8-sided Gold Theme) ── */
 .chess-board.style-newstyle {
-  clip-path: polygon(22% 0%, 78% 0%, 100% 22%, 100% 78%, 78% 100%, 22% 100%, 0% 78%, 0% 22%) !important;
-  border-radius: 14px !important;
+  border-radius: 16px !important;
+  border: 2.5px solid var(--gold-400) !important;
+  box-shadow: 0 0 25px rgba(240, 192, 64, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
 }
 
-/* ── 4P Style 1: Hexagonal Board (6-sided) ── */
+/* ── 4P Style 1: Hexagonal Board (6-sided Purple Theme) ── */
 .chess-board.style-ns4-hex {
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important;
-  border-radius: 12px !important;
+  border-radius: 20px !important;
+  border: 2.5px solid #a855f7 !important;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
 }
 
-/* ── 4P Style 2: Circular Ring Board ── */
+/* ── 4P Style 2: Circular Ring Board (Sky Cyan Theme) ── */
 .chess-board.style-ns4-ring {
-  border-radius: 50% !important;
-  clip-path: circle(50% at 50% 50%) !important;
+  border-radius: 28px !important;
+  border: 2.5px solid #38bdf8 !important;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
 }
 
-/* ── 4P Style 3: Diamond Board (4 Corners + Hollow Center) ── */
+/* ── 4P Style 3: Diamond Board (Amber Glow Theme) ── */
 .chess-board.style-ns4-diamond {
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%) !important;
-  border-radius: 12px !important;
+  border-radius: 18px !important;
+  border: 2.5px solid #f59e0b !important;
+  box-shadow: 0 0 25px rgba(245, 158, 11, 0.3), 0 12px 48px rgba(0, 0, 0, 0.75) !important;
 }
 
 /* ── 4P New Style Sub-Selector Screen ── */
