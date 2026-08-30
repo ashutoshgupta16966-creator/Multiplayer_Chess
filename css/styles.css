@@ -40,11 +40,11 @@
   /* Board */
   --cell-light: #d4c5a0;
   --cell-dark: #7a6240;
-  /* Cell size: fit the board into board-area with zero wasted space.
-     Horizontal: 100vw minus two side panels (220px each) minus padding/borders (~60px)
-     Vertical:   100vh minus board-area padding only (~16px top+bottom)
-     No artificial max cap — board fills all available space. */
-  --cell-size: min(calc((100vw - 500px) / 14), calc((100vh - 16px) / 14));
+  /* Cell size: fit the board into board-area with safe clamp bounds.
+     Horizontal: 100vw minus two side panels (220px each) minus padding (~60px)
+     Vertical:   100vh minus overhead (~120px)
+     Clamp guarantees board is always between 24px and 64px per cell. */
+  --cell-size: clamp(24px, min(calc((100vw - 500px) / 14), calc((100vh - 120px) / 14)), 64px);
   --board-gap: 1px;
 
   /* Misc */
@@ -1368,8 +1368,7 @@ body:has(#game-screen.active),
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1100px) {
   :root {
-    /* Panels shrink to 180px each; recalculate: 100vw - 360px panels - 60px other = 100vw - 420px */
-    --cell-size: min(calc((100vw - 420px) / 14), calc((100vh - 16px) / 14));
+    --cell-size: clamp(22px, min(calc((100vw - 420px) / 14), calc((100vh - 100px) / 14)), 56px);
   }
 
   .panel {
@@ -1380,24 +1379,26 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Mobile: panels stack above/below board.
-       Width axis:  100vw - 8px side margins
-       Height axis: 100svh minus top control strip (~56px) minus bottom panel (~230px) minus padding (~8px)
-       Board fills whichever dimension is smaller — zero wasted space in both directions. */
-    --cell-size: min(calc((100vw - 8px) / 14), calc((100svh - 294px) / 14));
+    /* Mobile: 14 cells scaled smoothly across all phone widths.
+       clamp(22px, calc((100vw - 12px) / 14), 48px) guarantees board is ALWAYS >= 22px/cell and scales with screen width */
+    --cell-size: clamp(22px, calc((100vw - 12px) / 14), 48px);
   }
 
-  /* Game screen fixed to viewport height so flex children fill it correctly */
+  /* Game screen scrolls vertically on mobile so all controls & logs remain accessible */
   #game-screen {
-    height: 100svh;
-    min-height: 100svh;
-    overflow: hidden;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .game-layout {
     flex-direction: column;
-    height: 100svh;
-    overflow: hidden;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
   }
 
   /* Panels become full-width horizontal/vertical strips */
@@ -1503,28 +1504,28 @@ body:has(#game-screen.active),
     font-size: 0.70rem;
   }
 
-  /* Board area — flex-grow fills all vertical space between top strip and bottom panel */
+  /* Board area — maximized to fill space without blank gaps */
   .board-area {
     order: 2;
-    padding: 4px 2px !important;
-    flex: 1 0 auto;
+    padding: 6px 2px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    overflow: visible;
-    min-height: 0;
   }
 
   .chess-board {
-    margin: 0 auto;
-    flex-shrink: 0;
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
   }
 
-  /* 2-Player 8x8 Board: fill both width and height on mobile */
+  /* 2-Player 8x8 Board: enlarged to fill width & height on mobile */
   .chess-board.mode-2p {
-    --cell-size-2p: min(calc((100vw - 8px) / 8), calc((100svh - 330px) / 8));
-    grid-template-columns: repeat(8, var(--cell-size-2p)) !important;
-    grid-template-rows: repeat(8, var(--cell-size-2p)) !important;
+    grid-template-columns: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
+    grid-template-rows: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
   }
 
   /* In-game board timer — visible on mobile below banners */
@@ -1534,7 +1535,7 @@ body:has(#game-screen.active),
     margin-bottom: 4px;
   }
 
-  /* Right panel → fixed height bottom strip (height kept in sync with cell-size formula: ~250px) */
+  /* Right panel → compact bottom strip with auto-scrolling log */
   .panel-right {
     order: 3;
     flex-direction: column;
@@ -1542,7 +1543,6 @@ body:has(#game-screen.active),
     padding: 8px 12px;
     flex-shrink: 0;
     overflow: hidden;
-    max-height: 250px;
   }
 
   .captured-area {
