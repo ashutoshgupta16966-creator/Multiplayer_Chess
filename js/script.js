@@ -380,30 +380,37 @@ function updateBoardShapeOverlay() {
   var svgNS = 'http://www.w3.org/2000/svg';
 
   if (boardStyleMode === 'ns3-hexagonal' || (boardStyleMode === 'newstyle' && typeof selectedPlayerCount !== 'undefined' && selectedPlayerCount === 3)) {
-    // 6-sided Hexagonal Chess Lock (matching reference image)
+    // 3P Hexagonal Chess Lock: symmetrical boundary matching the 3 player sectors (Red, Yellow, Green)
     var cutX = W * (3 / 14);
+    var cutY = H * (3 / 14);
     var hexPoly = document.createElementNS(svgNS, 'polygon');
     var hexPts = [
       (x + cutX) + ',' + y,
       (x + W - cutX) + ',' + y,
-      (x + W) + ',' + (y + H * 0.5),
+      (x + W) + ',' + (y + cutY),
+      (x + W) + ',' + (y + H - cutY),
       (x + W - cutX) + ',' + (y + H),
       (x + cutX) + ',' + (y + H),
-      x + ',' + (y + H * 0.5)
+      x + ',' + (y + H - cutY),
+      x + ',' + (y + cutY)
     ].join(' ');
     hexPoly.setAttribute('points', hexPts);
     hexPoly.setAttribute('fill', 'none');
-    hexPoly.setAttribute('stroke', 'rgba(34,197,94,0.9)'); // Emerald green stroke matching reference image
+    hexPoly.setAttribute('stroke', 'rgba(34,197,94,0.9)'); // Emerald green glowing stroke
     hexPoly.setAttribute('stroke-width', '3');
     svg.appendChild(hexPoly);
 
-    // Corner fills (mask 4 outer corner void triangles)
+    // Corner fills: mask ONLY the 4 outer corner void triangles (leaving cols 0-1 rows 3-10 completely open)
     var bgColor = '#09081a';
     var corners = [
-      [x + ',' + y, (x + cutX) + ',' + y, x + ',' + (y + H * 0.5)],
-      [(x + W - cutX) + ',' + y, (x + W) + ',' + y, (x + W) + ',' + (y + H * 0.5)],
-      [x + ',' + (y + H * 0.5), (x + cutX) + ',' + (y + H), x + ',' + (y + H)],
-      [(x + W) + ',' + (y + H * 0.5), (x + W - cutX) + ',' + (y + H), (x + W) + ',' + (y + H)]
+      // Top-Left corner void
+      [x + ',' + y, (x + cutX) + ',' + y, x + ',' + (y + cutY)],
+      // Top-Right corner void
+      [(x + W - cutX) + ',' + y, (x + W) + ',' + y, (x + W) + ',' + (y + cutY)],
+      // Bottom-Left corner void
+      [x + ',' + (y + H - cutY), (x + cutX) + ',' + (y + H), x + ',' + (y + H)],
+      // Bottom-Right corner void
+      [(x + W) + ',' + (y + H - cutY), (x + W - cutX) + ',' + (y + H), (x + W) + ',' + (y + H)]
     ];
     corners.forEach(function(pts3) {
       var tri = document.createElementNS(svgNS, 'polygon');

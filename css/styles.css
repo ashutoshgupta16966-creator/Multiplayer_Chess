@@ -1379,9 +1379,9 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Mobile: 14 cells scaled smoothly across all phone widths.
-       clamp(22px, calc((100vw - 12px) / 14), 48px) guarantees board is ALWAYS >= 22px/cell and scales with screen width */
-    --cell-size: clamp(22px, calc((100vw - 12px) / 14), 48px);
+    /* Mobile: 14 cells scaled smoothly across all phone widths with safe 8px margins on both sides.
+       clamp(21px, calc((100vw - 16px) / 14), 46px) guarantees board is ALWAYS centered and completely unclipped */
+    --cell-size: clamp(21px, calc((100vw - 16px) / 14), 46px);
   }
 
   /* Game screen scrolls vertically on mobile so all controls & logs remain accessible */
