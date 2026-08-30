@@ -1377,8 +1377,8 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Crisp board that fills the full phone width with safe margin and zero clipping */
-    --cell-size: clamp(18px, min(calc((100vw - 20px) / 14), calc((100vh - 280px) / 14)), 36px);
+    /* Large crisp board filling full screen width with zero wasted gaps */
+    --cell-size: clamp(23px, calc((100vw - 8px) / 14), 48px);
   }
 
   /* Game screen scrolls vertically on mobile */
@@ -1407,10 +1407,11 @@ body:has(#game-screen.active),
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 6px 8px;
+    gap: 6px;
     border-bottom: 1px solid var(--border);
     order: 1;
+    flex-shrink: 0;
   }
 
   .panel-left .panel-logo {
@@ -1418,23 +1419,23 @@ body:has(#game-screen.active),
   }
 
   .turn-indicator {
-    flex: 1 1 auto;
-    min-width: 100px;
-    max-width: 155px;
-    padding: 5px 8px;
-    gap: 6px;
+    flex: 0 1 auto;
+    min-width: 95px;
+    max-width: 130px;
+    padding: 4px 6px;
+    gap: 5px;
     box-sizing: border-box;
     overflow: hidden;
   }
 
   .turn-avatar {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
   }
 
   .turn-label {
-    font-size: 0.52rem;
+    font-size: 0.50rem;
     letter-spacing: 0.04em;
     white-space: nowrap;
     overflow: hidden;
@@ -1442,23 +1443,42 @@ body:has(#game-screen.active),
   }
 
   .turn-name {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .players-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 5px;
-    flex: 2;
-    min-width: 0;
+    display: grid !important;
+    grid-template-columns: repeat(2, 24px) !important;
+    grid-template-rows: repeat(2, 24px) !important;
+    gap: 4px !important;
+    width: auto !important;
+    margin: 0 6px !important;
+    flex-shrink: 0 !important;
   }
 
   .player-item {
-    padding: 5px 8px;
-    flex: 0 0 auto;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+    background: var(--bg-surface) !important;
+    box-sizing: border-box !important;
+  }
+
+  .player-color-dot {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    margin: auto !important;
   }
 
   .player-name-text {
@@ -1467,20 +1487,20 @@ body:has(#game-screen.active),
 
   .action-btn {
     margin: 0;
-    padding: 7px 10px;
-    font-size: 0.73rem;
+    padding: 6px 8px;
+    font-size: 0.70rem;
   }
 
   .menu-btn {
     margin-top: 0;
-    padding: 7px 10px;
-    font-size: 0.73rem;
+    padding: 6px 8px;
+    font-size: 0.70rem;
   }
 
-  /* Board area */
+  /* Board area — maximized to fill space without blank gaps */
   .board-area {
     order: 2;
-    padding: 8px 4px;
+    padding: 4px 2px !important;
     height: auto;
     overflow: visible;
     flex-shrink: 0;
@@ -1490,19 +1510,25 @@ body:has(#game-screen.active),
     margin: 0 auto;
   }
 
+  /* 2-Player 8x8 Board enlarged to fill width & height on mobile */
+  .chess-board.mode-2p {
+    grid-template-columns: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
+    grid-template-rows: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
+  }
+
   /* In-game board timer — visible on mobile below banners */
   .board-timer-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
-  /* Right panel → info section below board with rigid fixed height */
+  /* Right panel → info section below board with compact fixed height */
   .panel-right {
     order: 3;
     flex-direction: column;
     border-top: 1px solid var(--border);
-    padding: 12px 14px;
+    padding: 8px 12px;
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -3358,21 +3384,22 @@ body:not(.show-hud) .points-hud,
   box-shadow: 0 0 14px rgba(240, 192, 64, 0.35), inset 0 0 8px rgba(240, 192, 64, 0.15) !important;
   transition: all 0.2s ease !important;
   border-radius: var(--radius-sm) !important;
-  align-self: flex-end !important;
+  align-self: center !important;
   width: auto !important;
-  margin-top: 10px !important;
-  margin-bottom: 6px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
   margin-left: auto !important;
   margin-right: 0 !important;
-  padding: 6px 12px !important;
-  font-size: 0.73rem !important;
-  gap: 5px !important;
+  padding: 5px 10px !important;
+  font-size: 0.70rem !important;
+  gap: 4px !important;
+  height: 32px !important;
   flex-shrink: 0 !important;
 }
 
 #undo-btn svg {
-  width: 13px !important;
-  height: 13px !important;
+  width: 12px !important;
+  height: 12px !important;
 }
 
 .golden-action-btn:hover:not(:disabled),
@@ -3393,13 +3420,15 @@ body:not(.show-hud) .points-hud,
   box-shadow: none !important;
 }
 
-/* 3. Player Turn Cards — Strict 2x2 Grid Layout */
+/* 3. Player Turn Cards — Compact Centered 2x2 Grid with Concentric Glow */
 .players-list {
   display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  grid-template-rows: 1fr 1fr !important;
-  gap: 8px !important;
-  width: 100% !important;
+  grid-template-columns: repeat(2, 28px) !important;
+  grid-template-rows: repeat(2, 28px) !important;
+  gap: 5px !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+  margin: 0 8px !important;
 }
 
 .grid-slot-red { grid-column: 1; grid-row: 1; }    /* Gold - Top Left */
@@ -3411,14 +3440,16 @@ body:not(.show-hud) .points-hud,
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
-  padding: 8px 12px !important;
-  border-radius: var(--radius-md) !important;
-  border: 1.5px solid var(--border) !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
   background: var(--bg-surface) !important;
   transition: var(--transition) !important;
-  min-width: 0 !important;
-  min-height: 38px !important;
+  box-sizing: border-box !important;
 }
 
 .player-color-dot {
@@ -3427,8 +3458,8 @@ body:not(.show-hud) .points-hud,
   border-radius: 50% !important;
   background: var(--player-color) !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 0 8px var(--player-color) !important;
-  margin: 0 !important;
+  box-shadow: 0 0 6px var(--player-color) !important;
+  margin: auto !important;
 }
 
 .player-color-dot.inactive-dot {
@@ -3436,15 +3467,16 @@ body:not(.show-hud) .points-hud,
 }
 
 .player-item.active-turn {
-  border-color: var(--player-color) !important;
-  box-shadow: 0 0 12px rgba(var(--player-rgb), 0.45) !important;
-  background: rgba(240, 192, 64, 0.08) !important;
+  border: 2.5px solid var(--player-color) !important;
+  box-shadow: 0 0 10px var(--player-color), inset 0 0 4px var(--player-color) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: scale(1.08) !important;
 }
 
 .player-item.inactive-slot {
   border: 1.5px dashed rgba(255, 255, 255, 0.12) !important;
   background: rgba(255, 255, 255, 0.02) !important;
-  opacity: 0.55 !important;
+  opacity: 0.35 !important;
 }
 
 .badge-off {
@@ -3556,6 +3588,7 @@ body:not(.show-hud) .points-hud,
    ════════════════════════════════════════════════════════════ */
 
 /* ══ Common: invalid cells in New Style modes are invisible (pure void) ══ */
+.chess-board.style-ns3-hexagonal .cell.invalid,
 .chess-board.style-ns4-octagonal .cell.invalid,
 .chess-board.style-ns4-diamond .cell.invalid,
 .chess-board.style-ns4-circular .cell.invalid {
@@ -3564,6 +3597,8 @@ body:not(.show-hud) .points-hud,
   border-radius: 0 !important;
 }
 
+.chess-board.style-ns3-hexagonal .cell.invalid::before,
+.chess-board.style-ns3-hexagonal .cell.invalid::after,
 .chess-board.style-ns4-octagonal .cell.invalid::before,
 .chess-board.style-ns4-octagonal .cell.invalid::after,
 .chess-board.style-ns4-diamond .cell.invalid::before,
@@ -3572,6 +3607,15 @@ body:not(.show-hud) .points-hud,
 .chess-board.style-ns4-circular .cell.invalid::after {
   display: none !important;
   content: none !important;
+}
+
+/* ── 3P New Style: HEXAGONAL CHESS LOCK ── */
+/* 6-sided hexagonal boundary (matching reference image). */
+.chess-board.style-ns3-hexagonal {
+  border: none !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
 /* ── Style 1: OCTAGONAL CHESS LOCK ── */
@@ -3586,7 +3630,7 @@ body:not(.show-hud) .points-hud,
 
 /* ── Style 2: DIAMOND CHESS LOCK ── */
 /* 4 isolated corner quadrant boards with a genuine void centre.
-   Standard Black & White chessboard color scheme (matching standard chess tiles). */
+   Classic White and Brown chessboard color scheme. */
 .chess-board.style-ns4-diamond {
   border: none !important;
   box-shadow: none !important;
@@ -3594,16 +3638,16 @@ body:not(.show-hud) .points-hud,
   border-radius: 0 !important;
 }
 
-/* Light tiles: crisp bright ivory / white */
+/* Light tiles: classic warm cream / ivory white */
 .chess-board.style-ns4-diamond .cell.light {
-  background: #f0f2f5 !important;
+  background: #f4ecd8 !important;
   color: #111111 !important;
   border-radius: 1px !important;
 }
 
-/* Dark tiles: rich deep charcoal / slate black */
+/* Dark tiles: rich classic chessboard wood brown */
 .chess-board.style-ns4-diamond .cell.dark {
-  background: #232433 !important;
+  background: #805333 !important;
   color: #ffffff !important;
   border-radius: 1px !important;
 }

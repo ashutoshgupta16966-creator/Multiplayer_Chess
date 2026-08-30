@@ -22,10 +22,25 @@ function isValidCell(row, col) {
 
   if (BOARD_SIZE === 14) {
 
+    // ── 3P New Style: HEXAGONAL CHESS LOCK ─────────────────────
+    // 6-sided hexagonal boundary (matching Hexagonal Chess Lock reference image).
+    // Flat top and bottom, angled left and right vertices.
+    if (boardStyleMode === 'ns3-hexagonal' || (boardStyleMode === 'newstyle' && (typeof selectedPlayerCount !== 'undefined' && selectedPlayerCount === 3))) {
+      // Cut top-left corner
+      if (row + col < 3) return false;
+      // Cut top-right corner
+      if (row + (13 - col) < 3) return false;
+      // Cut bottom-left corner
+      if ((13 - row) + col < 3) return false;
+      // Cut bottom-right corner
+      if ((13 - row) + (13 - col) < 3) return false;
+      return true;
+    }
+
     // ── 4P Style 1: OCTAGONAL CHESS LOCK ───────────────────────
     // 8-sided octagonal boundary with truncated corners.
     // Each side = 8 squares, diagonal cuts = 3 squares each corner.
-    if (boardStyleMode === 'ns4-octagonal' || boardStyleMode === 'newstyle') {
+    if (boardStyleMode === 'ns4-octagonal' || (boardStyleMode === 'newstyle' && (typeof selectedPlayerCount === 'undefined' || selectedPlayerCount === 4))) {
       // Cut top-left diagonal
       if (row + col < 3) return false;
       // Cut top-right diagonal
@@ -256,16 +271,20 @@ function renderBoard(activePlayerIds) {
     boardEl.setAttribute('aria-label', '14x14 chess board');
   }
 
-  // Apply / remove NS4 shape classes (cleared first)
+  // Apply / remove NS shape classes (cleared first)
   var allNS4Classes = [
     'style-ns4-hex', 'style-ns4-ring', 'style-ns4-diamond',
-    'style-ns4-octagonal', 'style-ns4-circular', 'style-newstyle'
+    'style-ns4-octagonal', 'style-ns4-circular', 'style-ns3-hexagonal', 'style-newstyle'
   ];
   allNS4Classes.forEach(function (cls) { boardEl.classList.remove(cls); });
   if (boardStyleMode === 'ns4-octagonal') boardEl.classList.add('style-ns4-octagonal');
-  else if (boardStyleMode === 'newstyle') boardEl.classList.add('style-ns4-octagonal'); // 3P also octagonal
   else if (boardStyleMode === 'ns4-diamond') boardEl.classList.add('style-ns4-diamond');
   else if (boardStyleMode === 'ns4-circular') boardEl.classList.add('style-ns4-circular');
+  else if (boardStyleMode === 'ns3-hexagonal' || (boardStyleMode === 'newstyle' && activePlayerIds.length === 3)) {
+    boardEl.classList.add('style-ns3-hexagonal');
+  } else if (boardStyleMode === 'newstyle') {
+    boardEl.classList.add('style-ns4-octagonal');
+  }
 
   const seatZoneMap = { red: 'bottom', yellow: 'top', green: 'left', blue: 'right' };
   activeZonesSet = new Set(activePlayerIds.map(p => seatZoneMap[p]).filter(Boolean));
@@ -360,7 +379,41 @@ function updateBoardShapeOverlay() {
 
   var svgNS = 'http://www.w3.org/2000/svg';
 
-  if (boardStyleMode === 'ns4-octagonal' || boardStyleMode === 'newstyle') {
+  if (boardStyleMode === 'ns3-hexagonal' || (boardStyleMode === 'newstyle' && typeof selectedPlayerCount !== 'undefined' && selectedPlayerCount === 3)) {
+    // 6-sided Hexagonal Chess Lock (matching reference image)
+    var cutX = W * (3 / 14);
+    var hexPoly = document.createElementNS(svgNS, 'polygon');
+    var hexPts = [
+      (x + cutX) + ',' + y,
+      (x + W - cutX) + ',' + y,
+      (x + W) + ',' + (y + H * 0.5),
+      (x + W - cutX) + ',' + (y + H),
+      (x + cutX) + ',' + (y + H),
+      x + ',' + (y + H * 0.5)
+    ].join(' ');
+    hexPoly.setAttribute('points', hexPts);
+    hexPoly.setAttribute('fill', 'none');
+    hexPoly.setAttribute('stroke', 'rgba(34,197,94,0.9)'); // Emerald green stroke matching reference image
+    hexPoly.setAttribute('stroke-width', '3');
+    svg.appendChild(hexPoly);
+
+    // Corner fills (mask 4 outer corner void triangles)
+    var bgColor = '#09081a';
+    var corners = [
+      [x + ',' + y, (x + cutX) + ',' + y, x + ',' + (y + H * 0.5)],
+      [(x + W - cutX) + ',' + y, (x + W) + ',' + y, (x + W) + ',' + (y + H * 0.5)],
+      [x + ',' + (y + H * 0.5), (x + cutX) + ',' + (y + H), x + ',' + (y + H)],
+      [(x + W) + ',' + (y + H * 0.5), (x + W - cutX) + ',' + (y + H), (x + W) + ',' + (y + H)]
+    ];
+    corners.forEach(function(pts3) {
+      var tri = document.createElementNS(svgNS, 'polygon');
+      tri.setAttribute('points', pts3.join(' '));
+      tri.setAttribute('fill', bgColor);
+      tri.setAttribute('stroke', 'none');
+      svg.appendChild(tri);
+    });
+
+  } else if (boardStyleMode === 'ns4-octagonal' || boardStyleMode === 'newstyle') {
     // 8-sided octagon: corners cut = 3/14 of board width
     var cut = W * (3 / 14);
     var cutH = H * (3 / 14);
@@ -525,14 +578,11 @@ function renderPlayersList(activePlayers, currentId, eliminatedIds) {
       item.style.setProperty('--player-color', p.cssColor);
       item.style.setProperty('--player-rgb', p.cssRGB);
 
-      // ONLY color circle + active/elim indicator (NO text name labels)
+      // ONLY centered color circle (active ring handled concentrically via CSS)
       if (isActive) {
-        item.innerHTML = `
-          <span class="player-color-dot" style="background:${p.cssColor}"></span>
-          <span class="player-status-badge badge-active">▶</span>
-        `;
+        item.innerHTML = `<span class="player-color-dot" style="background:${p.cssColor}"></span>`;
       } else {
-        const elimBadge = isElim ? '<span class="player-status-badge badge-elim">ELIM</span>' : '';
+        const elimBadge = isElim ? '<span class="player-status-badge badge-elim">✕</span>' : '';
         item.innerHTML = `
           <span class="player-color-dot" style="background:${p.cssColor}"></span>
           ${elimBadge}
