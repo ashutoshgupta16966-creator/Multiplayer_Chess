@@ -735,19 +735,23 @@ body:has(#game-screen.active),
 .turn-indicator {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 14px;
-  transition: border-color var(--transition);
+  padding: 8px 12px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .turn-avatar {
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 2.5px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.25);
   flex-shrink: 0;
   transition: background var(--transition), border-color var(--transition);
 }
@@ -755,20 +759,32 @@ body:has(#game-screen.active),
 .turn-info {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  justify-content: center;
 }
 
 .turn-label {
-  font-size: 0.67rem;
+  font-size: 0.60rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .turn-name {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 /* Players list */
@@ -807,10 +823,7 @@ body:has(#game-screen.active),
 }
 
 .player-name-text {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  flex: 1;
+  display: none !important;
 }
 
 .player-status-badge {
@@ -1405,9 +1418,34 @@ body:has(#game-screen.active),
   }
 
   .turn-indicator {
-    flex: 1;
-    min-width: 110px;
-    max-width: 180px;
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 155px;
+    padding: 5px 8px;
+    gap: 6px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .turn-avatar {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .turn-label {
+    font-size: 0.52rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .turn-name {
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .players-list {
@@ -1424,7 +1462,7 @@ body:has(#game-screen.active),
   }
 
   .player-name-text {
-    font-size: 0.73rem;
+    display: none !important;
   }
 
   .action-btn {
@@ -3372,7 +3410,7 @@ body:not(.show-hud) .points-hud,
 .player-item {
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
   gap: 8px !important;
   padding: 8px 12px !important;
   border-radius: var(--radius-md) !important;
@@ -3548,8 +3586,7 @@ body:not(.show-hud) .points-hud,
 
 /* ── Style 2: DIAMOND CHESS LOCK ── */
 /* 4 isolated corner quadrant boards with a genuine void centre.
-   Transparent background + transparent invalid cells = the dark page background
-   shows through the void. SVG overlay draws the central diamond ring. */
+   Standard Black & White chessboard color scheme (matching standard chess tiles). */
 .chess-board.style-ns4-diamond {
   border: none !important;
   box-shadow: none !important;
@@ -3557,14 +3594,17 @@ body:not(.show-hud) .points-hud,
   border-radius: 0 !important;
 }
 
-/* Each valid corner cell gets normal chess board background */
+/* Light tiles: crisp bright ivory / white */
 .chess-board.style-ns4-diamond .cell.light {
-  background: var(--cell-light) !important;
+  background: #f0f2f5 !important;
+  color: #111111 !important;
   border-radius: 1px !important;
 }
 
+/* Dark tiles: rich deep charcoal / slate black */
 .chess-board.style-ns4-diamond .cell.dark {
-  background: var(--cell-dark) !important;
+  background: #232433 !important;
+  color: #ffffff !important;
   border-radius: 1px !important;
 }
 

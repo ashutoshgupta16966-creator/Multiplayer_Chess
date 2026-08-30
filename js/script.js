@@ -419,7 +419,7 @@ function updateBoardShapeOverlay() {
     ].join(' ');
     diamond.setAttribute('points', dPts);
     diamond.setAttribute('fill', '#09081a');
-    diamond.setAttribute('stroke', 'rgba(245,158,11,0.7)');
+    diamond.setAttribute('stroke', 'rgba(240,192,64,0.85)');
     diamond.setAttribute('stroke-width', '3');
     svg.appendChild(diamond);
 
@@ -525,15 +525,13 @@ function renderPlayersList(activePlayers, currentId, eliminatedIds) {
       item.style.setProperty('--player-color', p.cssColor);
       item.style.setProperty('--player-rgb', p.cssRGB);
 
+      // ONLY color circle + active/elim indicator (NO text name labels)
       if (isActive) {
-        // Active Turn: Color circle on left + Team name + Active indicator
         item.innerHTML = `
           <span class="player-color-dot" style="background:${p.cssColor}"></span>
-          <span class="player-name-text">${p.name}</span>
           <span class="player-status-badge badge-active">▶</span>
         `;
       } else {
-        // Inactive players: Only color circle on left (no text name)
         const elimBadge = isElim ? '<span class="player-status-badge badge-elim">ELIM</span>' : '';
         item.innerHTML = `
           <span class="player-color-dot" style="background:${p.cssColor}"></span>

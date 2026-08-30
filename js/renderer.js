@@ -203,7 +203,6 @@ export function renderPlayersList(players, currentPlayerId, eliminatedIds = new 
 
     item.innerHTML = `
       <span class="player-color-dot" style="background:${p.cssColor}"></span>
-      <span class="player-name-text">${p.name}</span>
       ${statusText ? `<span class="player-status-badge ${badgeClass}">${statusText}</span>` : ''}
     `;
     container.appendChild(item);
