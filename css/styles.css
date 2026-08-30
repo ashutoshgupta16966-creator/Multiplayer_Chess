@@ -1091,6 +1091,10 @@ body:has(#game-screen.active),
   grid-template-columns: repeat(14, var(--cell-size));
   grid-template-rows: repeat(14, var(--cell-size));
   gap: var(--board-gap);
+  width: var(--board-size, auto);
+  height: var(--board-size, auto);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
   border: 2.5px solid rgba(240, 192, 64, 0.5);
   border-radius: 8px;
   box-shadow:
@@ -1102,8 +1106,12 @@ body:has(#game-screen.active),
   background: linear-gradient(145deg, #2a1f0a, #1e1505);
   padding: var(--board-gap);
   outline: none;
-  max-width: 100%;
   box-sizing: border-box;
+}
+
+.chess-board.mode-2p {
+  grid-template-columns: repeat(8, var(--cell-size)) !important;
+  grid-template-rows: repeat(8, var(--cell-size)) !important;
 }
 
 /* Individual cells */
@@ -1379,26 +1387,30 @@ body:has(#game-screen.active),
 
 @media (max-width: 800px) {
   :root {
-    /* Mobile: 14 cells scaled smoothly across all phone widths with safe 8px margins on both sides.
-       clamp(21px, calc((100vw - 16px) / 14), 46px) guarantees board is ALWAYS centered and completely unclipped */
     --cell-size: clamp(21px, calc((100vw - 16px) / 14), 46px);
   }
 
-  /* Game screen scrolls vertically on mobile so all controls & logs remain accessible */
+  /* Game screen container fills viewport without outer scrolling */
   #game-screen {
-    height: auto;
+    height: 100vh;
     min-height: 100vh;
     min-height: 100dvh;
-    overflow-y: auto;
-    overflow-x: hidden;
+    max-height: 100vh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .game-layout {
+    display: flex;
     flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
-    overflow: visible;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    gap: 0;
   }
 
   /* Panels become full-width horizontal/vertical strips */
@@ -1409,16 +1421,16 @@ body:has(#game-screen.active),
     border-left: none;
   }
 
-  /* Left panel → compact info strip above board */
+  /* Left panel → compact top control strip */
   .panel-left {
+    flex: 0 0 auto !important;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    padding: 6px 8px;
+    padding: 6px 8px !important;
     gap: 6px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border) !important;
     order: 1;
-    flex-shrink: 0;
   }
 
   .panel-left .panel-logo {
@@ -1504,28 +1516,37 @@ body:has(#game-screen.active),
     font-size: 0.70rem;
   }
 
-  /* Board area — maximized to fill space without blank gaps */
+  /* Board area — sits directly below top control bar with zero blank gaps */
   .board-area {
     order: 2;
-    padding: 6px 2px !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 4px 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Hide decorative watermarks on mobile so there are no empty pattern voids */
+  .board-area::before,
+  .board-area::after {
+    display: none !important;
   }
 
   .chess-board {
     margin: 0 auto !important;
     flex-shrink: 0 !important;
+    aspect-ratio: 1 / 1 !important;
   }
 
-  /* 2-Player 8x8 Board: enlarged to fill width & height on mobile */
+  /* 2-Player 8x8 Board on mobile */
   .chess-board.mode-2p {
-    grid-template-columns: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
-    grid-template-rows: repeat(8, clamp(38px, calc((100vw - 16px) / 8), 54px)) !important;
+    grid-template-columns: repeat(8, var(--cell-size)) !important;
+    grid-template-rows: repeat(8, var(--cell-size)) !important;
   }
 
   /* In-game board timer — visible on mobile below banners */
@@ -1535,32 +1556,41 @@ body:has(#game-screen.active),
     margin-bottom: 4px;
   }
 
-  /* Right panel → compact bottom strip with auto-scrolling log */
+  /* Right panel (Captured & Move Log) fills remaining space below board */
   .panel-right {
     order: 3;
-    flex-direction: column;
-    border-top: 1px solid var(--border);
-    padding: 8px 12px;
-    flex-shrink: 0;
-    overflow: hidden;
+    flex: 1 1 auto !important;
+    min-height: 80px !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 8px 12px !important;
+    border-top: 1px solid var(--border) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
   }
 
-  .captured-area {
+  .bottom-panel-side-by-side {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  .bottom-panel-col {
+    flex: 1 1 50% !important;
+    display: flex !important;
     flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    gap: 4px !important;
-    height: 90px !important;
-    min-height: 90px !important;
-    max-height: 90px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: contain !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
+  .captured-area,
   .move-log {
-    height: 90px !important;
-    min-height: 90px !important;
-    max-height: 90px !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 40px !important;
+    max-height: none !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior: contain !important;

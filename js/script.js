@@ -333,9 +333,77 @@ function renderBoard(activePlayerIds) {
     }
   }
 
-  // After all cells rendered, update the visual shape overlay
+  // After all cells rendered, update dynamic sizing and shape overlay
+  updateDynamicBoardLayout();
   updateBoardShapeOverlay();
 }
+
+/**
+ * Dynamically calculates optimal chessboard and wrapper dimensions
+ * so the board maximizes available space between the top control panel
+ * and the bottom Captured/Move Log section with zero blank gaps.
+ */
+function updateDynamicBoardLayout() {
+  var gameScreen = document.getElementById('game-screen');
+  if (!gameScreen || !gameScreen.classList.contains('active')) return;
+
+  var boardEl = document.getElementById('chess-board');
+  var boardAreaEl = document.querySelector('.board-area');
+  var panelLeftEl = document.querySelector('.panel-left');
+  var panelRightEl = document.querySelector('.panel-right');
+  if (!boardEl || !boardAreaEl) return;
+
+  var winW = window.innerWidth || document.documentElement.clientWidth;
+  var winH = window.innerHeight || document.documentElement.clientHeight;
+  var size = (typeof BOARD_SIZE !== 'undefined' && BOARD_SIZE) ? BOARD_SIZE : 14;
+
+  if (winW <= 800) {
+    // ── Mobile Viewport ──
+    var topH = panelLeftEl ? Math.round(panelLeftEl.getBoundingClientRect().height) : 104;
+    var minBottomH = 80;
+    var pad = 8;
+    var availW = Math.max(220, winW - 12);
+    var availH = Math.max(220, winH - topH - minBottomH - pad);
+
+    // Max square board size fitting both horizontal & vertical bounds
+    var maxBoardPx = Math.floor(Math.min(availW, availH));
+    var cellPx = Math.floor(((maxBoardPx - (size - 1)) / size) * 10) / 10;
+    if (cellPx < 18) cellPx = 18;
+    var finalBoardPx = Math.round((cellPx * size) + (size - 1));
+
+    document.documentElement.style.setProperty('--cell-size', cellPx + 'px');
+    document.documentElement.style.setProperty('--board-size', finalBoardPx + 'px');
+    boardAreaEl.style.height = (finalBoardPx + 8) + 'px';
+    boardAreaEl.style.minHeight = (finalBoardPx + 8) + 'px';
+  } else {
+    // ── Desktop / Tablet Landscape ──
+    var leftW = panelLeftEl ? Math.round(panelLeftEl.getBoundingClientRect().width) : 220;
+    var rightW = panelRightEl ? Math.round(panelRightEl.getBoundingClientRect().width) : 220;
+    var availW = Math.max(300, winW - leftW - rightW - 40);
+    var availH = Math.max(300, winH - 24);
+
+    var maxBoardPx = Math.floor(Math.min(availW, availH));
+    var cellPx = Math.floor(((maxBoardPx - (size - 1)) / size) * 10) / 10;
+    if (cellPx < 22) cellPx = 22;
+    var finalBoardPx = Math.round((cellPx * size) + (size - 1));
+
+    document.documentElement.style.setProperty('--cell-size', cellPx + 'px');
+    document.documentElement.style.setProperty('--board-size', finalBoardPx + 'px');
+    boardAreaEl.style.height = '';
+    boardAreaEl.style.minHeight = '';
+  }
+
+  // Update SVG shape overlay coordinates immediately after layout update
+  if (typeof updateBoardShapeOverlay === 'function') {
+    updateBoardShapeOverlay();
+  }
+}
+
+// Attach window resize & orientation change listeners
+window.addEventListener('resize', updateDynamicBoardLayout);
+window.addEventListener('orientationchange', function () {
+  setTimeout(updateDynamicBoardLayout, 100);
+});
 
 /**
  * Updates the SVG #board-shape-overlay to draw the exact outer boundary
@@ -2818,6 +2886,7 @@ function startGame() {
   renderBoard(activeIds);
   placeAllPieces(activeIds);
   initBoardState(activeIds);  // sync logical state with DOM
+  setTimeout(updateDynamicBoardLayout, 50);
 
   // Apply visual themes
   if (typeof StoreManager !== 'undefined') {
