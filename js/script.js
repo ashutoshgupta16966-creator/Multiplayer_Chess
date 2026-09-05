@@ -2116,11 +2116,61 @@ playerBtns.forEach(btn => {
 /* ════════════════════════════════════════════════════════════
    SCREEN TRANSITIONS & SPA HISTORY ROUTING
    ════════════════════════════════════════════════════════════ */
+
+/**
+ * _resetScreenState(id)
+ * Resets all UI selection flags and button states for the given screen so
+ * that every interactive element is live and responsive after a back
+ * navigation (popstate) returns to that screen.
+ */
+function _resetScreenState(id) {
+  switch (id) {
+    case 'setup-screen':
+      // Reset player-count selection and start button
+      selectedPlayerCount = null;
+      document.querySelectorAll('.player-btn').forEach(function (b) {
+        b.classList.remove('selected');
+        b.setAttribute('aria-pressed', 'false');
+        b.disabled = false; // ensure buttons are never left disabled
+      });
+      startBtn.disabled = true;
+      startBtnText.textContent = 'Select player count first';
+      break;
+
+    case 'mode-screen':
+      // Reset mode + difficulty UI only — keep playerCount intact
+      selectedMode = null;
+      selectedDifficulty = null;
+      document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      document.querySelectorAll('.diff-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      var dp = document.getElementById('difficulty-panel');
+      if (dp) { dp.classList.remove('visible'); dp.setAttribute('aria-hidden', 'true'); }
+      _updateModeStartBtn();
+      break;
+
+    case 'board-style-screen':
+      // Reset board style selection — keep playerCount + mode intact
+      selectedBoardStyle = null;
+      document.querySelectorAll('.style-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      var bsBtn = document.getElementById('board-style-start-btn');
+      if (bsBtn) { bsBtn.disabled = true; bsBtn.querySelector('.start-btn-text').textContent = 'Select a style to begin'; }
+      break;
+
+    case 'ns4-style-screen':
+      // Reset ns4 shape selection buttons
+      document.querySelectorAll('.ns4-style-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      break;
+
+    default:
+      break;
+  }
+}
+
 function showScreen(id, pushHistory) {
   if (pushHistory !== false) {
     try {
       if (!history.state || history.state.screen !== id) {
-        history.pushState({ screen: id }, '', '');
+        history.pushState({ screen: id }, '', '?step=' + id);
       }
     } catch (e) { }
   }
@@ -2866,19 +2916,39 @@ function returnToMenu(pushHistory) {
 
 /* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
 window.addEventListener('popstate', function (e) {
-  // 1. Close any open overlays/modals first
+  // ── Step 1: Dismiss any open modal/overlay first ──────────────────────────
+  // Each modal interception pushes its own history entry on open, so
+  // a single back swipe correctly closes the topmost layer.
+
+  var promotionModal = document.getElementById('promotion-modal');
+  if (promotionModal && !promotionModal.getAttribute('aria-hidden') === false) {
+    // promotion modal uses aria-hidden="false" when visible
+    if (promotionModal.getAttribute('aria-hidden') === 'false') {
+      promotionModal.setAttribute('aria-hidden', 'true');
+      return;
+    }
+  }
+
+  var checkmateAlertModal = document.getElementById('checkmate-alert-modal');
+  if (checkmateAlertModal && checkmateAlertModal.getAttribute('aria-hidden') === 'false') {
+    checkmateAlertModal.setAttribute('aria-hidden', 'true');
+    return;
+  }
+
   var statsModal = document.getElementById('stats-modal');
   if (statsModal && statsModal.classList.contains('active')) {
     closeStatsModal();
     return;
   }
+
   var victoryModal = document.getElementById('victory-modal');
   if (victoryModal && victoryModal.classList.contains('active')) {
     victoryModal.classList.remove('active');
-    stopConfetti();
+    if (typeof stopConfetti === 'function') stopConfetti();
     returnToMenu(false);
     return;
   }
+
   var checkmateModal = document.getElementById('checkmate-modal');
   if (checkmateModal && checkmateModal.classList.contains('active')) {
     checkmateModal.classList.remove('active');
@@ -2886,17 +2956,36 @@ window.addEventListener('popstate', function (e) {
     return;
   }
 
-  // 2. Determine target screen from history state
-  var targetScreen = (e.state && e.state.screen) ? e.state.screen : 'setup-screen';
+  // ── Step 2: Determine target screen from history state ────────────────────
+  // Prefer history.state.screen; fallback to ?step= URL param; then setup-screen.
+  var targetScreen;
+  if (e.state && e.state.screen) {
+    targetScreen = e.state.screen;
+  } else {
+    var urlParams = new URLSearchParams(window.location.search);
+    targetScreen = urlParams.get('step') || 'setup-screen';
+  }
+
+  var VALID_SCREENS = ['setup-screen', 'mode-screen', 'board-style-screen', 'ns4-style-screen', 'game-screen', 'store-screen'];
+  if (VALID_SCREENS.indexOf(targetScreen) === -1) {
+    targetScreen = 'setup-screen';
+  }
+
   var currentScreenEl = document.querySelector('.screen.active');
   var currentScreenId = currentScreenEl ? currentScreenEl.id : '';
 
+  // ── Step 3: Navigate and reset UI state so buttons are never frozen ────────
   if (currentScreenId === 'game-screen' && targetScreen !== 'game-screen') {
+    // Going back from active game → always clean up game state first
     returnToMenu(false);
     if (targetScreen !== 'setup-screen') {
+      _resetScreenState(targetScreen);
       showScreen(targetScreen, false);
     }
   } else {
+    // All other back transitions: reset the target screen's UI state first,
+    // then show it. This ensures all buttons are unfrozen and fully interactive.
+    _resetScreenState(targetScreen);
     showScreen(targetScreen, false);
   }
 });
@@ -2961,7 +3050,7 @@ document.addEventListener('click', function () {
 
 try {
   if (!history.state || !history.state.screen) {
-    history.replaceState({ screen: 'setup-screen' }, '', '');
+    history.replaceState({ screen: 'setup-screen' }, '', '?step=setup-screen');
   }
 } catch (e) { }
 
