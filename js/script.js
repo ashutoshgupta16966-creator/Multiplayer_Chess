@@ -2977,75 +2977,20 @@ function returnToMenu(pushHistory) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   EXIT ACTIONS & MODAL HANDLERS
+   APP REFRESH / HARD RESET HANDLER
    ════════════════════════════════════════════════════════════ */
 
-function openExitModal() {
-  var modal = document.getElementById('exit-modal');
-  if (!modal) return;
-  modal.classList.add('active');
-  modal.setAttribute('aria-hidden', 'false');
-  try {
-    window.history.pushState({ modal: 'exit-modal' }, '', window.location.search);
-  } catch (e) { }
-}
-
-function closeExitModal(fromHistory) {
-  var modal = document.getElementById('exit-modal');
-  if (!modal) return;
-  modal.classList.remove('active');
-  modal.setAttribute('aria-hidden', 'true');
-  if (!fromHistory && history.state && history.state.modal === 'exit-modal') {
-    try {
-      window.history.back();
-    } catch (e) { }
-  }
-}
-
 /**
- * Immediately attempts to close the app/tab.
- * If blocked by the browser, fallbacks immediately to external referrer or history.back()
- * with ZERO intermediate toast/text popup UI.
+ * Completely resets the entire app back to its initial fresh state
+ * by navigating to window.location.origin (or performing a full reload)
+ * with zero leftover state from previous games or selections.
  */
-function exitApp() {
-  var modal = document.getElementById('exit-modal');
-  if (modal) {
-    modal.classList.remove('active');
-    modal.setAttribute('aria-hidden', 'true');
-  }
-
-  // 1. Immediately attempt to close tab/app window
+function refreshApp() {
   try {
-    window.close();
-  } catch (e) { }
-
-  try {
-    window.open('', '_self').close();
-  } catch (e) { }
-
-  // 2. Immediate fallback: if external referrer exists (e.g. WhatsApp, LinkedIn), return to it
-  if (document.referrer && !document.referrer.includes(window.location.host)) {
-    try {
-      window.location.replace(document.referrer);
-      return;
-    } catch (e) { }
+    window.location.href = window.location.origin + window.location.pathname;
+  } catch (e) {
+    window.location.reload();
   }
-
-  // 3. Fallback: navigate back in history to instantly return to referring app
-  try {
-    window.history.back();
-  } catch (e) { }
-}
-
-function confirmExitGame() {
-  var modal = document.getElementById('exit-modal');
-  if (modal) {
-    modal.classList.remove('active');
-    modal.setAttribute('aria-hidden', 'true');
-  }
-
-  // Unified exit flow: always completely exit the app
-  exitApp();
 }
 
 /* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
@@ -3055,11 +3000,6 @@ window.addEventListener('popstate', function (e) {
   isLoading = false;
 
   // ── Step 1: Dismiss any open modal/overlay first ──────────────────────────
-  var exitModal = document.getElementById('exit-modal');
-  if (exitModal && (exitModal.classList.contains('active') || exitModal.getAttribute('aria-hidden') === 'false')) {
-    closeExitModal(true);
-    return;
-  }
 
   var statsModal = document.getElementById('stats-modal');
   if (statsModal && (statsModal.classList.contains('active') || statsModal.getAttribute('aria-hidden') === 'false')) {

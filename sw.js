@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════
    RajaChess — Service Worker (Network-First + Offline Fallback)
-   Cache version: rajachess-v24
+   Cache version: rajachess-v25
    ═══════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'rajachess-v24';
+const CACHE_NAME = 'rajachess-v25';
 
 /* Core assets to pre-cache on install */
 const PRECACHE_ASSETS = [

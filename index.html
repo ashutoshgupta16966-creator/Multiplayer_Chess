@@ -188,11 +188,11 @@
           <span class="store-open-sub">Themes · Skins · Shapes</span>
         </button>
 
-        <!-- Exit Game Button -->
-        <button class="store-open-btn setup-exit-btn" id="setup-exit-btn" onclick="openExitModal()" aria-label="Exit RajaChess">
-          <span class="store-open-icon">🚪</span>
-          <span class="store-open-text">EXIT GAME</span>
-          <span class="store-open-sub">Leave or End Session</span>
+        <!-- Refresh App Button -->
+        <button class="store-open-btn setup-refresh-btn" id="setup-refresh-btn" onclick="refreshApp()" aria-label="Refresh RajaChess">
+          <span class="store-open-icon">🔄</span>
+          <span class="store-open-text">REFRESH</span>
+          <span class="store-open-sub">Reset to Fresh State</span>
         </button>
       </div>
 
@@ -468,7 +468,6 @@
             <span id="ingame-timer" class="game-timer-digits" aria-live="polite">00:00</span>
           </div>
           <button class="menu-btn golden-action-btn" id="back-to-menu-btn" aria-label="Return to main menu">← Main Menu</button>
-          <button class="menu-btn exit-action-btn" id="ingame-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
         </div>
       </aside>
 
@@ -610,20 +609,6 @@
       <div class="badges-grid" id="badges-grid"></div>
 
       <button class="modal-close-btn" onclick="closeStatsModal()">Close</button>
-    </div>
-  </div>
-
-  <!-- ═══ Exit Game Pop-up Modal ═══ -->
-  <div id="exit-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true"
-    aria-labelledby="exit-modal-title">
-    <div class="modal-content exit-modal-content">
-      <div class="modal-icon exit-modal-icon" aria-hidden="true">🚪</div>
-      <h2 class="modal-title" id="exit-modal-title">Exit RajaChess</h2>
-      <p class="modal-message" id="exit-modal-message">Are you sure you want to exit?</p>
-      <div class="modal-btn-row">
-        <button class="modal-btn modal-btn-secondary" id="exit-cancel-btn" onclick="closeExitModal()">Cancel</button>
-        <button class="modal-btn modal-btn-danger" id="exit-confirm-btn" onclick="confirmExitGame()">Yes, Exit</button>
-      </div>
     </div>
   </div>
 
