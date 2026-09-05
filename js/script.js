@@ -2977,7 +2977,7 @@ function returnToMenu(pushHistory) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   EXIT MODAL & NOTIFICATION TOAST
+   EXIT ACTIONS & MODAL HANDLERS
    ════════════════════════════════════════════════════════════ */
 
 function openExitModal() {
@@ -3002,6 +3002,41 @@ function closeExitModal(fromHistory) {
   }
 }
 
+/**
+ * Immediately attempts to close the app/tab.
+ * If blocked by the browser, fallbacks immediately to external referrer or history.back()
+ * with ZERO intermediate toast/text popup UI.
+ */
+function exitApp() {
+  var modal = document.getElementById('exit-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  // 1. Immediately attempt to close tab/app window
+  try {
+    window.close();
+  } catch (e) { }
+
+  try {
+    window.open('', '_self').close();
+  } catch (e) { }
+
+  // 2. Immediate fallback: if external referrer exists (e.g. WhatsApp, LinkedIn), return to it
+  if (document.referrer && !document.referrer.includes(window.location.host)) {
+    try {
+      window.location.replace(document.referrer);
+      return;
+    } catch (e) { }
+  }
+
+  // 3. Fallback: navigate back in history to instantly return to referring app
+  try {
+    window.history.back();
+  } catch (e) { }
+}
+
 function confirmExitGame() {
   var modal = document.getElementById('exit-modal');
   if (modal) {
@@ -3018,28 +3053,8 @@ function confirmExitGame() {
     _resetScreenState('setup-screen');
     showScreen('setup-screen');
   } else {
-    try {
-      window.close();
-    } catch (e) { }
-    showToast('Session ended. You can safely close this tab or swipe away.');
+    exitApp();
   }
-}
-
-var toastTimeout = null;
-function showToast(message) {
-  var existing = document.querySelector('.app-toast');
-  if (!existing) {
-    existing = document.createElement('div');
-    existing.className = 'app-toast';
-    document.body.appendChild(existing);
-  }
-  existing.textContent = message;
-  existing.classList.add('visible');
-
-  if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(function () {
-    existing.classList.remove('visible');
-  }, 3500);
 }
 
 /* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
