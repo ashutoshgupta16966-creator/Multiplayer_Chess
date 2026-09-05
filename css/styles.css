@@ -3715,3 +3715,206 @@ body:not(.show-hud) .points-hud,
   color: var(--gold-400);
   flex-shrink: 0;
 }
+
+/* ════════════════════════════════════════════════════════════
+   EXIT BUTTONS, POP-UP MODAL & NOTIFICATION TOAST
+   ════════════════════════════════════════════════════════════ */
+
+/* Top Bar Exit Button */
+.exit-hud-btn {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+.exit-hud-btn:hover {
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Setup Screen Action Buttons */
+.setup-nav-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  width: 100%;
+  max-width: 540px;
+  justify-content: center;
+}
+
+.setup-nav-actions .store-open-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.setup-exit-btn {
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  color: #fca5a5 !important;
+}
+
+.setup-exit-btn:hover {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Mode and Style Screen Exit Buttons */
+.mode-exit-btn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.45) !important;
+  color: #fca5a5 !important;
+  transition: all 0.2s ease !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.mode-exit-btn:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* In-Game Exit Button (directly below Main Menu button) */
+.exit-action-btn,
+#ingame-exit-btn {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.20), rgba(185, 28, 28, 0.20)) !important;
+  border: 1.5px solid rgba(239, 68, 68, 0.55) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), inset 0 0 8px rgba(239, 68, 68, 0.1) !important;
+  transition: all 0.2s ease !important;
+  border-radius: var(--radius-sm) !important;
+  cursor: pointer !important;
+  margin-top: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.exit-action-btn:hover:not(:disabled),
+#ingame-exit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.38), rgba(185, 28, 28, 0.38)) !important;
+  border-color: #fca5a5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(239, 68, 68, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Mobile responsive styling for action buttons in top bar */
+@media (max-width: 800px) {
+  .setup-nav-actions {
+    flex-direction: column;
+    gap: 10px;
+    max-width: 100%;
+    padding: 0 12px;
+  }
+
+  .exit-action-btn,
+  #ingame-exit-btn {
+    width: auto !important;
+    margin-top: 0 !important;
+    padding: 6px 8px !important;
+    font-size: 0.70rem !important;
+    height: auto !important;
+  }
+}
+
+/* ── Exit Modal Overlay & Content ── */
+.exit-modal-content {
+  background: var(--bg-card) !important;
+  border: 1.5px solid rgba(240, 192, 64, 0.6) !important;
+  border-radius: var(--radius-xl) !important;
+  padding: 32px 28px !important;
+  max-width: 380px !important;
+  width: 90% !important;
+  text-align: center !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(240, 192, 64, 0.25) !important;
+}
+
+.exit-modal-icon {
+  font-size: 3rem !important;
+  line-height: 1 !important;
+  margin-bottom: 12px !important;
+  filter: drop-shadow(0 0 12px rgba(240, 192, 64, 0.5)) !important;
+}
+
+.modal-btn-row {
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: center !important;
+  margin-top: 20px !important;
+}
+
+.modal-btn {
+  flex: 1 !important;
+  padding: 12px 18px !important;
+  font-weight: 700 !important;
+  font-size: 0.90rem !important;
+  border-radius: var(--radius-sm) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: 'Inter', sans-serif !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.modal-btn-secondary {
+  background: var(--bg-surface) !important;
+  border: 1.5px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-btn-secondary:hover {
+  background: var(--bg-hover) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.modal-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  border: 1.5px solid #f87171 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+}
+
+.modal-btn-danger:hover {
+  background: linear-gradient(135deg, #f87171, #ef4444) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Toast notification */
+.app-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  background: rgba(26, 16, 64, 0.95);
+  border: 1.5px solid var(--gold-400);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 12px 24px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 20px var(--gold-glow);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.app-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}

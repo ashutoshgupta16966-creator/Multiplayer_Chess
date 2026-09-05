@@ -1981,6 +1981,8 @@ let selectedPlayerCount = null;
 var selectedMode = null;   // 'friends' | 'computer'
 var selectedDifficulty = null; // 'beginner' | 'intermediate' | 'advanced'
 var selectedBoardStyle = null; // 'ordinary' | 'newstyle' (for 3/4 player only)
+var isNavigating = false;
+var isLoading = false;
 
 const setupScreen = document.getElementById('setup-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -2124,6 +2126,9 @@ playerBtns.forEach(btn => {
  * navigation (popstate) returns to that screen.
  */
 function _resetScreenState(id) {
+  isNavigating = false;
+  isLoading = false;
+
   switch (id) {
     case 'setup-screen':
       // Reset player-count selection and start button
@@ -2131,46 +2136,98 @@ function _resetScreenState(id) {
       document.querySelectorAll('.player-btn').forEach(function (b) {
         b.classList.remove('selected');
         b.setAttribute('aria-pressed', 'false');
-        b.disabled = false; // ensure buttons are never left disabled
+        b.disabled = false;
+        b.style.pointerEvents = '';
       });
-      startBtn.disabled = true;
-      startBtnText.textContent = 'Select player count first';
+      if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.style.pointerEvents = '';
+        if (startBtnText) startBtnText.textContent = 'Select player count first';
+      }
       break;
 
     case 'mode-screen':
       // Reset mode + difficulty UI only — keep playerCount intact
       selectedMode = null;
       selectedDifficulty = null;
-      document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
-      document.querySelectorAll('.diff-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      document.querySelectorAll('.mode-btn').forEach(function (b) {
+        b.classList.remove('selected');
+        b.disabled = false;
+        b.style.pointerEvents = '';
+      });
+      document.querySelectorAll('.diff-btn').forEach(function (b) {
+        b.classList.remove('selected');
+        b.disabled = false;
+        b.style.pointerEvents = '';
+      });
       var dp = document.getElementById('difficulty-panel');
-      if (dp) { dp.classList.remove('visible'); dp.setAttribute('aria-hidden', 'true'); }
+      if (dp) {
+        dp.classList.remove('visible');
+        dp.setAttribute('aria-hidden', 'true');
+      }
       _updateModeStartBtn();
+      var msBtn = document.getElementById('mode-start-btn');
+      if (msBtn) msBtn.style.pointerEvents = '';
       break;
 
     case 'board-style-screen':
       // Reset board style selection — keep playerCount + mode intact
       selectedBoardStyle = null;
-      document.querySelectorAll('.style-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      document.querySelectorAll('.style-btn').forEach(function (b) {
+        b.classList.remove('selected');
+        b.disabled = false;
+        b.style.pointerEvents = '';
+      });
       var bsBtn = document.getElementById('board-style-start-btn');
-      if (bsBtn) { bsBtn.disabled = true; bsBtn.querySelector('.start-btn-text').textContent = 'Select a style to begin'; }
+      if (bsBtn) {
+        bsBtn.disabled = true;
+        bsBtn.style.pointerEvents = '';
+        var bst = bsBtn.querySelector('.start-btn-text');
+        if (bst) bst.textContent = 'Select a style to begin';
+      }
       break;
 
     case 'ns4-style-screen':
       // Reset ns4 shape selection buttons
-      document.querySelectorAll('.ns4-style-btn').forEach(function (b) { b.classList.remove('selected'); b.disabled = false; });
+      document.querySelectorAll('.ns4-style-btn').forEach(function (b) {
+        b.classList.remove('selected');
+        b.disabled = false;
+        b.style.pointerEvents = '';
+      });
+      break;
+
+    case 'store-screen':
+      document.querySelectorAll('.store-tab, .store-buy-btn, .store-back-btn').forEach(function (b) {
+        b.style.pointerEvents = '';
+      });
       break;
 
     default:
       break;
   }
+
+  // Ensure all interactive action and navigation buttons are unfrozen
+  document.querySelectorAll('button:not(#undo-btn):not([disabled])').forEach(function (btn) {
+    btn.style.pointerEvents = '';
+  });
+}
+
+function navigateBack(fallbackScreen) {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    showScreen(fallbackScreen || 'setup-screen');
+  }
 }
 
 function showScreen(id, pushHistory) {
+  isNavigating = false;
+  isLoading = false;
+
   if (pushHistory !== false) {
     try {
-      if (!history.state || history.state.screen !== id) {
-        history.pushState({ screen: id }, '', '?step=' + id);
+      if (!history.state || (history.state.step !== id && history.state.screen !== id)) {
+        window.history.pushState({ step: id, screen: id }, '', '?step=' + id);
       }
     } catch (e) { }
   }
@@ -2427,14 +2484,22 @@ function openStatsModal() {
   if (modal) {
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
+    try {
+      window.history.pushState({ modal: 'stats-modal' }, '', window.location.search);
+    } catch (e) { }
   }
 }
 
-function closeStatsModal() {
+function closeStatsModal(fromHistory) {
   var modal = document.getElementById('stats-modal');
   if (modal) {
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
+    if (!fromHistory && history.state && history.state.modal === 'stats-modal') {
+      try {
+        window.history.back();
+      } catch (e) { }
+    }
   }
 }
 
@@ -2552,7 +2617,7 @@ function openStore() {
 }
 
 function closeStore() {
-  showScreen('setup-screen');
+  navigateBack('setup-screen');
 }
 
 function switchStoreTab(tab) {
@@ -2892,7 +2957,8 @@ function startGame() {
 }
 
 function returnToMenu(pushHistory) {
-  showScreen('setup-screen', pushHistory);
+  isNavigating = false;
+  isLoading = false;
   resetGameTimer();
   selectedPlayerCount = null;
   selectedMode = null;
@@ -2906,38 +2972,104 @@ function returnToMenu(pushHistory) {
   updateCapturedArea();
   var logEl = document.getElementById('move-log');
   if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
-  playerBtns.forEach(btn => {
-    btn.classList.remove('selected');
-    btn.setAttribute('aria-pressed', 'false');
-  });
-  startBtn.disabled = true;
-  startBtnText.textContent = 'Select player count first';
+  _resetScreenState('setup-screen');
+  showScreen('setup-screen', pushHistory);
+}
+
+/* ════════════════════════════════════════════════════════════
+   EXIT MODAL & NOTIFICATION TOAST
+   ════════════════════════════════════════════════════════════ */
+
+function openExitModal() {
+  var modal = document.getElementById('exit-modal');
+  if (!modal) return;
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  try {
+    window.history.pushState({ modal: 'exit-modal' }, '', window.location.search);
+  } catch (e) { }
+}
+
+function closeExitModal(fromHistory) {
+  var modal = document.getElementById('exit-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  if (!fromHistory && history.state && history.state.modal === 'exit-modal') {
+    try {
+      window.history.back();
+    } catch (e) { }
+  }
+}
+
+function confirmExitGame() {
+  var modal = document.getElementById('exit-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  var activeScr = document.querySelector('.screen.active');
+  var activeId = activeScr ? activeScr.id : '';
+
+  if (activeId === 'game-screen') {
+    returnToMenu(true);
+  } else if (activeId && activeId !== 'setup-screen') {
+    _resetScreenState('setup-screen');
+    showScreen('setup-screen');
+  } else {
+    try {
+      window.close();
+    } catch (e) { }
+    showToast('Session ended. You can safely close this tab or swipe away.');
+  }
+}
+
+var toastTimeout = null;
+function showToast(message) {
+  var existing = document.querySelector('.app-toast');
+  if (!existing) {
+    existing = document.createElement('div');
+    existing.className = 'app-toast';
+    document.body.appendChild(existing);
+  }
+  existing.textContent = message;
+  existing.classList.add('visible');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(function () {
+    existing.classList.remove('visible');
+  }, 3500);
 }
 
 /* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
 window.addEventListener('popstate', function (e) {
+  // Forcefully reset any navigation locks or loading flags
+  isNavigating = false;
+  isLoading = false;
+
   // ── Step 1: Dismiss any open modal/overlay first ──────────────────────────
-  // Each modal interception pushes its own history entry on open, so
-  // a single back swipe correctly closes the topmost layer.
+  var exitModal = document.getElementById('exit-modal');
+  if (exitModal && (exitModal.classList.contains('active') || exitModal.getAttribute('aria-hidden') === 'false')) {
+    closeExitModal(true);
+    return;
+  }
+
+  var statsModal = document.getElementById('stats-modal');
+  if (statsModal && (statsModal.classList.contains('active') || statsModal.getAttribute('aria-hidden') === 'false')) {
+    closeStatsModal(true);
+    return;
+  }
 
   var promotionModal = document.getElementById('promotion-modal');
-  if (promotionModal && !promotionModal.getAttribute('aria-hidden') === false) {
-    // promotion modal uses aria-hidden="false" when visible
-    if (promotionModal.getAttribute('aria-hidden') === 'false') {
-      promotionModal.setAttribute('aria-hidden', 'true');
-      return;
-    }
+  if (promotionModal && promotionModal.getAttribute('aria-hidden') === 'false') {
+    promotionModal.setAttribute('aria-hidden', 'true');
+    return;
   }
 
   var checkmateAlertModal = document.getElementById('checkmate-alert-modal');
   if (checkmateAlertModal && checkmateAlertModal.getAttribute('aria-hidden') === 'false') {
     checkmateAlertModal.setAttribute('aria-hidden', 'true');
-    return;
-  }
-
-  var statsModal = document.getElementById('stats-modal');
-  if (statsModal && statsModal.classList.contains('active')) {
-    closeStatsModal();
     return;
   }
 
@@ -2957,11 +3089,11 @@ window.addEventListener('popstate', function (e) {
   }
 
   // ── Step 2: Determine target screen from history state ────────────────────
-  // Prefer history.state.screen; fallback to ?step= URL param; then setup-screen.
-  var targetScreen;
-  if (e.state && e.state.screen) {
-    targetScreen = e.state.screen;
-  } else {
+  var targetScreen = null;
+  if (e.state) {
+    targetScreen = e.state.step || e.state.screen;
+  }
+  if (!targetScreen) {
     var urlParams = new URLSearchParams(window.location.search);
     targetScreen = urlParams.get('step') || 'setup-screen';
   }
@@ -2974,20 +3106,19 @@ window.addEventListener('popstate', function (e) {
   var currentScreenEl = document.querySelector('.screen.active');
   var currentScreenId = currentScreenEl ? currentScreenEl.id : '';
 
-  // ── Step 3: Navigate and reset UI state so buttons are never frozen ────────
+  // ── Step 3: Handle in-game back navigation ────────────────────────────────
   if (currentScreenId === 'game-screen' && targetScreen !== 'game-screen') {
-    // Going back from active game → always clean up game state first
     returnToMenu(false);
     if (targetScreen !== 'setup-screen') {
       _resetScreenState(targetScreen);
       showScreen(targetScreen, false);
     }
-  } else {
-    // All other back transitions: reset the target screen's UI state first,
-    // then show it. This ensures all buttons are unfrozen and fully interactive.
-    _resetScreenState(targetScreen);
-    showScreen(targetScreen, false);
+    return;
   }
+
+  // ── Step 4: Step-by-step navigation & unfreeze interactive state ──────────
+  _resetScreenState(targetScreen);
+  showScreen(targetScreen, false);
 });
 
 startBtn.addEventListener('click', function () {
@@ -3049,8 +3180,8 @@ document.addEventListener('click', function () {
 }, { once: false });
 
 try {
-  if (!history.state || !history.state.screen) {
-    history.replaceState({ screen: 'setup-screen' }, '', '?step=setup-screen');
+  if (!history.state || (!history.state.step && !history.state.screen)) {
+    window.history.replaceState({ step: 'setup-screen', screen: 'setup-screen' }, '', '?step=setup-screen');
   }
 } catch (e) { }
 

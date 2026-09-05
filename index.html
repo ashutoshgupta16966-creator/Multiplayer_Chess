@@ -66,7 +66,11 @@
           <span class="stats-open-icon">🏆</span>
           <span class="stats-open-text">Stats</span>
         </button>
-
+        <button class="hud-btn exit-hud-btn" id="hud-exit-btn" onclick="openExitModal()"
+          aria-label="Exit Game or App">
+          <span class="exit-icon">🚪</span>
+          <span class="exit-text">Exit</span>
+        </button>
       </div>
     </div>
   </header>
@@ -180,12 +184,22 @@
         <div class="legend-item"><span class="legend-dot" style="background:#E0115F"></span> Ruby — Right</div>
       </div>
 
-      <!-- Shahi Khazana Store Button -->
-      <button class="store-open-btn" id="store-open-btn" onclick="openStore()" aria-label="Open Shahi Khazana Store">
-        <span class="store-open-icon">🏺</span>
-        <span class="store-open-text">Shahi Khazana</span>
-        <span class="store-open-sub">Themes · Skins · Shapes</span>
-      </button>
+      <!-- Setup Screen Action Buttons -->
+      <div class="setup-nav-actions">
+        <!-- Shahi Khazana Store Button -->
+        <button class="store-open-btn" id="store-open-btn" onclick="openStore()" aria-label="Open Shahi Khazana Store">
+          <span class="store-open-icon">🏺</span>
+          <span class="store-open-text">Shahi Khazana</span>
+          <span class="store-open-sub">Themes · Skins · Shapes</span>
+        </button>
+
+        <!-- Exit Game Button -->
+        <button class="store-open-btn setup-exit-btn" id="setup-exit-btn" onclick="openExitModal()" aria-label="Exit RajaChess">
+          <span class="store-open-icon">🚪</span>
+          <span class="store-open-text">Exit Game</span>
+          <span class="store-open-sub">Leave or End Session</span>
+        </button>
+      </div>
 
       <!-- Creator credit -->
       <div class="creator-credit" aria-label="Created By Ashutosh Gupta"><span class="credit-initial">C</span>reated
@@ -258,7 +272,8 @@
         </div>
 
         <div class="mode-actions">
-          <button class="menu-btn mode-back-btn" onclick="showScreen('setup-screen')">← Back</button>
+          <button class="menu-btn mode-back-btn" onclick="navigateBack('setup-screen')">← Back</button>
+          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
           <button class="start-btn mode-start-btn" id="mode-start-btn" disabled onclick="confirmModeAndStart()">
             <span class="start-btn-text">Select a mode to begin</span>
             <svg class="start-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -307,7 +322,8 @@
         </div>
 
         <div class="mode-actions">
-          <button class="menu-btn mode-back-btn" onclick="showScreen('mode-screen')">← Back</button>
+          <button class="menu-btn mode-back-btn" onclick="navigateBack('mode-screen')">← Back</button>
+          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
           <button class="start-btn mode-start-btn" id="board-style-start-btn" disabled
             onclick="confirmBoardStyleAndStart()">
             <span class="start-btn-text">Select a style to begin</span>
@@ -365,7 +381,8 @@
         </div>
 
         <div class="mode-actions">
-          <button class="menu-btn mode-back-btn" onclick="showScreen('board-style-screen')">← Back</button>
+          <button class="menu-btn mode-back-btn" onclick="navigateBack('board-style-screen')">← Back</button>
+          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
         </div>
       </div>
     </div>
@@ -459,6 +476,7 @@
             <span id="ingame-timer" class="game-timer-digits" aria-live="polite">00:00</span>
           </div>
           <button class="menu-btn golden-action-btn" id="back-to-menu-btn" aria-label="Return to main menu">← Main Menu</button>
+          <button class="menu-btn exit-action-btn" id="ingame-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
         </div>
       </aside>
 
@@ -600,6 +618,20 @@
       <div class="badges-grid" id="badges-grid"></div>
 
       <button class="modal-close-btn" onclick="closeStatsModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- ═══ Exit Game Pop-up Modal ═══ -->
+  <div id="exit-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="exit-modal-title">
+    <div class="modal-content exit-modal-content">
+      <div class="modal-icon exit-modal-icon" aria-hidden="true">🚪</div>
+      <h2 class="modal-title" id="exit-modal-title">Exit RajaChess?</h2>
+      <p class="modal-message" id="exit-modal-message">Are you sure you want to exit the current session?</p>
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-secondary" id="exit-cancel-btn" onclick="closeExitModal()">No, Stay</button>
+        <button class="modal-btn modal-btn-danger" id="exit-confirm-btn" onclick="confirmExitGame()">Yes, Exit</button>
+      </div>
     </div>
   </div>
 
