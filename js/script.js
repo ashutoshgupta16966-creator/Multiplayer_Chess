@@ -3048,11 +3048,14 @@ function confirmExitGame() {
   var activeId = activeScr ? activeScr.id : '';
 
   if (activeId === 'game-screen') {
-    returnToMenu(true);
+    // On board screen: total close/exit — do NOT route back to home menu
+    exitApp();
   } else if (activeId && activeId !== 'setup-screen') {
+    // On sub-screens: return cleanly to home
     _resetScreenState('setup-screen');
     showScreen('setup-screen');
   } else {
+    // On home screen: immediate exit
     exitApp();
   }
 }

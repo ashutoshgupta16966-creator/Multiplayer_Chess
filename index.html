@@ -66,11 +66,6 @@
           <span class="stats-open-icon">🏆</span>
           <span class="stats-open-text">Stats</span>
         </button>
-        <button class="hud-btn exit-hud-btn" id="hud-exit-btn" onclick="openExitModal()"
-          aria-label="Exit Game or App">
-          <span class="exit-icon">🚪</span>
-          <span class="exit-text">Exit</span>
-        </button>
       </div>
     </div>
   </header>
@@ -196,7 +191,7 @@
         <!-- Exit Game Button -->
         <button class="store-open-btn setup-exit-btn" id="setup-exit-btn" onclick="exitApp()" aria-label="Exit RajaChess">
           <span class="store-open-icon">🚪</span>
-          <span class="store-open-text">Exit Game</span>
+          <span class="store-open-text">EXIT GAME</span>
           <span class="store-open-sub">Leave or End Session</span>
         </button>
       </div>
@@ -273,7 +268,6 @@
 
         <div class="mode-actions">
           <button class="menu-btn mode-back-btn" onclick="navigateBack('setup-screen')">← Back</button>
-          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
           <button class="start-btn mode-start-btn" id="mode-start-btn" disabled onclick="confirmModeAndStart()">
             <span class="start-btn-text">Select a mode to begin</span>
             <svg class="start-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -323,7 +317,6 @@
 
         <div class="mode-actions">
           <button class="menu-btn mode-back-btn" onclick="navigateBack('mode-screen')">← Back</button>
-          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
           <button class="start-btn mode-start-btn" id="board-style-start-btn" disabled
             onclick="confirmBoardStyleAndStart()">
             <span class="start-btn-text">Select a style to begin</span>
@@ -382,7 +375,6 @@
 
         <div class="mode-actions">
           <button class="menu-btn mode-back-btn" onclick="navigateBack('board-style-screen')">← Back</button>
-          <button class="menu-btn mode-exit-btn" onclick="openExitModal()" aria-label="Exit Game">🚪 Exit</button>
         </div>
       </div>
     </div>
