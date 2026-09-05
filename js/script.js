@@ -2976,22 +2976,7 @@ function returnToMenu(pushHistory) {
   showScreen('setup-screen', pushHistory);
 }
 
-/* ════════════════════════════════════════════════════════════
-   APP REFRESH / HARD RESET HANDLER
-   ════════════════════════════════════════════════════════════ */
 
-/**
- * Completely resets the entire app back to its initial fresh state
- * by navigating to window.location.origin (or performing a full reload)
- * with zero leftover state from previous games or selections.
- */
-function refreshApp() {
-  try {
-    window.location.href = window.location.origin + window.location.pathname;
-  } catch (e) {
-    window.location.reload();
-  }
-}
 
 /* ── SPA Popstate / Mobile Back Button & Gesture Handler ── */
 window.addEventListener('popstate', function (e) {

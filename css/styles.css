@@ -3715,44 +3715,4 @@ body:not(.show-hud) .points-hud,
   color: var(--gold-400);
   flex-shrink: 0;
 }
-
-/* ════════════════════════════════════════════════════════════
-   HOME SCREEN ACTION BUTTONS (Khazana & Refresh)
-   ════════════════════════════════════════════════════════════ */
-
-/* ── Home Screen Action Buttons Row (Khazana + Refresh side by side) ── */
-.setup-nav-actions {
-  display: flex;
-  flex-direction: row;
-  gap: 14px;
-  width: 100%;
-  max-width: 540px;
-  justify-content: center;
-}
-
-.setup-nav-actions .store-open-btn {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Home screen REFRESH button — cyan/emerald fresh accent */
-.setup-refresh-btn {
-  border-color: rgba(56, 189, 248, 0.45) !important;
-  color: #7dd3fc !important;
-}
-
-.setup-refresh-btn:hover {
-  border-color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.12) !important;
-  color: #ffffff !important;
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35) !important;
-}
-
-@media (max-width: 800px) {
-  .setup-nav-actions {
-    flex-direction: column;
-    gap: 10px;
-    max-width: 100%;
-    padding: 0 12px;
-  }
-}
+
