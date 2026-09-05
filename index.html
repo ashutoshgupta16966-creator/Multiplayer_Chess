@@ -189,7 +189,7 @@
         </button>
 
         <!-- Exit Game Button -->
-        <button class="store-open-btn setup-exit-btn" id="setup-exit-btn" onclick="exitApp()" aria-label="Exit RajaChess">
+        <button class="store-open-btn setup-exit-btn" id="setup-exit-btn" onclick="openExitModal()" aria-label="Exit RajaChess">
           <span class="store-open-icon">🚪</span>
           <span class="store-open-text">EXIT GAME</span>
           <span class="store-open-sub">Leave or End Session</span>
@@ -618,10 +618,10 @@
     aria-labelledby="exit-modal-title">
     <div class="modal-content exit-modal-content">
       <div class="modal-icon exit-modal-icon" aria-hidden="true">🚪</div>
-      <h2 class="modal-title" id="exit-modal-title">Exit RajaChess?</h2>
-      <p class="modal-message" id="exit-modal-message">Are you sure you want to exit the current session?</p>
+      <h2 class="modal-title" id="exit-modal-title">Exit RajaChess</h2>
+      <p class="modal-message" id="exit-modal-message">Are you sure you want to exit?</p>
       <div class="modal-btn-row">
-        <button class="modal-btn modal-btn-secondary" id="exit-cancel-btn" onclick="closeExitModal()">No, Stay</button>
+        <button class="modal-btn modal-btn-secondary" id="exit-cancel-btn" onclick="closeExitModal()">Cancel</button>
         <button class="modal-btn modal-btn-danger" id="exit-confirm-btn" onclick="confirmExitGame()">Yes, Exit</button>
       </div>
     </div>
