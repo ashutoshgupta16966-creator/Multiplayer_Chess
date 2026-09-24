@@ -1461,6 +1461,9 @@ function advanceTurn() {
 
   updateTurnIndicator(cp);
   renderPlayersList(gameActivePlayers, cp.id, eliminatedSet);
+  if (typeof Online !== 'undefined' && selectedMode === 'online') {
+    Online.updateTurnUI();
+  }
 
   // Trigger AI move if this player is computer-controlled
   if (aiPlayerIds.has(cp.id)) {
@@ -1507,12 +1510,19 @@ function syncBoardDOM() {
  * player picks a promotion piece.
  */
 
-function executeMove(fromRow, fromCol, toRow, toCol) {
+function executeMove(fromRow, fromCol, toRow, toCol, fromOnlineRemote, onlinePromotion) {
   /* Start the game timer on the very first move */
   startGameTimer();
 
   var piece = boardState[fromRow][fromCol];
   if (!piece) return;
+
+  var isPromo = piece.type === 'pawn' && isPawnPromotionSquare(toRow, toCol, piece.player);
+
+  // In online mode, broadcast standard moves immediately (promotions broadcast after piece is chosen)
+  if (selectedMode === 'online' && !fromOnlineRemote && typeof Online !== 'undefined' && !isPromo) {
+    Online.sendMove(fromRow, fromCol, toRow, toCol, null);
+  }
 
   var logEl = document.getElementById('move-log');
   var capturedPiece = boardState[toRow][toCol];
@@ -1573,10 +1583,24 @@ function executeMove(fromRow, fromCol, toRow, toCol) {
 
   // Check for pawn promotion
   if (piece.type === 'pawn' && isPawnPromotionSquare(toRow, toCol, piece.player)) {
+    // If promotion was received from remote online player
+    if (fromOnlineRemote && onlinePromotion) {
+      boardState[toRow][toCol] = { player: piece.player, type: onlinePromotion };
+      removePiece(toRow, toCol);
+      placePiece(toRow, toCol, onlinePromotion, piece.player);
+      appendPromotionToLog(onlinePromotion);
+      showPromotionBanner(PLAYER_DEFS[piece.player].name, onlinePromotion);
+      advanceTurn();
+      return;
+    }
+
     var promos = getAvailablePromotions(piece.player);
     var hasAvail = promos.some(function (p) { return p.available; });
     if (!hasAvail) {
       // Every promotion type is at its cap — pawn stays as pawn
+      if (selectedMode === 'online' && !fromOnlineRemote && typeof Online !== 'undefined') {
+        Online.sendMove(fromRow, fromCol, toRow, toCol, null);
+      }
       advanceTurn();
       return;
     }
@@ -1609,6 +1633,12 @@ function executeMove(fromRow, fromCol, toRow, toCol) {
       // Annotate the log entry with the chosen promotion
       appendPromotionToLog(chosenType);
       showPromotionBanner(PLAYER_DEFS[piece.player].name, chosenType);
+
+      // In online mode, broadcast the move with the chosen promotion
+      if (selectedMode === 'online' && !fromOnlineRemote && typeof Online !== 'undefined') {
+        Online.sendMove(fromRow, fromCol, toRow, toCol, chosenType);
+      }
+
       advanceTurn();
     });
     return; // turn advances inside the modal callback above
@@ -1667,6 +1697,13 @@ function undoLastMove() {
 function handleCellClick(row, col) {
   var cp = currentPlayer();
   var piece = boardState[row][col];
+
+  // In online multiplayer: only allow interaction if it is this client's turn
+  if (selectedMode === 'online' && typeof Online !== 'undefined' && Online.myColor) {
+    if (cp.id !== Online.myColor) {
+      return;
+    }
+  }
 
   // Case 1: clicking own piece — (re-)select it
   if (piece && piece.player === cp.id) {
@@ -2043,15 +2080,26 @@ function _updateModeStartBtn() {
   if (!selectedMode) { btn.disabled = true; txt.textContent = 'Select a mode to begin'; return; }
   if (selectedMode === 'computer' && !selectedDifficulty) { btn.disabled = true; txt.textContent = 'Select a difficulty'; return; }
   btn.disabled = false;
-  txt.textContent = selectedMode === 'computer'
-    ? 'Play vs Computer (' + selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1) + ')'
-    : 'Play with Friends';
+  if (selectedMode === 'computer') {
+    txt.textContent = 'Play vs Computer (' + selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1) + ')';
+  } else if (selectedMode === 'online') {
+    txt.textContent = 'Set Up Online Room →';
+  } else {
+    txt.textContent = 'Play with Friends (Offline)';
+  }
 }
 
 function confirmModeAndStart() {
   if (!selectedMode) return;
   if (selectedMode === 'computer' && !selectedDifficulty) return;
-  // 3/4 player games show the board-style selection screen before starting
+
+  // Online mode → show the lobby/room setup screen
+  if (selectedMode === 'online') {
+    showOnlineLobbyScreen();
+    return;
+  }
+
+  // 3/4 player offline games → board-style selection first
   if (selectedPlayerCount === 3 || selectedPlayerCount === 4) {
     showBoardStyleScreen();
   } else {
@@ -2214,6 +2262,12 @@ function _resetScreenState(id) {
         b.disabled = false;
         b.style.pointerEvents = '';
       });
+      break;
+
+    case 'online-screen':
+      if (typeof Online !== 'undefined') {
+        Online.clearErrors();
+      }
       break;
 
     case 'store-screen':
@@ -2963,6 +3017,15 @@ function startGame() {
   var cp = currentPlayer();
   updateTurnIndicator(cp);
   renderPlayersList(gameActivePlayers, cp.id, eliminatedSet);
+  if (selectedMode === 'online' && typeof Online !== 'undefined') {
+    Online.updateTurnUI();
+  }
+
+  // Undo button display
+  var undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) {
+    undoBtn.style.display = selectedMode === 'online' ? 'none' : '';
+  }
 
   // ── Wire up click handling ───────────────────────────────────
   attachBoardClickHandler();
@@ -2992,6 +3055,12 @@ function returnToMenu(pushHistory) {
   updateCapturedArea();
   var logEl = document.getElementById('move-log');
   if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
+
+  // Disconnect from online room if applicable
+  if (typeof Online !== 'undefined') {
+    Online.disconnect();
+  }
+
   _resetScreenState('setup-screen');
   showScreen('setup-screen', pushHistory);
 }
@@ -3049,7 +3118,7 @@ window.addEventListener('popstate', function (e) {
     targetScreen = urlParams.get('step') || 'setup-screen';
   }
 
-  var VALID_SCREENS = ['setup-screen', 'mode-screen', 'board-style-screen', 'ns4-style-screen', 'game-screen', 'store-screen'];
+  var VALID_SCREENS = ['setup-screen', 'mode-screen', 'board-style-screen', 'ns4-style-screen', 'online-screen', 'game-screen', 'store-screen'];
   if (VALID_SCREENS.indexOf(targetScreen) === -1) {
     targetScreen = 'setup-screen';
   }

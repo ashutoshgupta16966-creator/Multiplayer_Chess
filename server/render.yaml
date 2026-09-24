@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rajachess-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://multiplayer-chess-eta.vercel.app

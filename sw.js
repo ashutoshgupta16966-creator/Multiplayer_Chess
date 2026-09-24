@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════
    RajaChess — Service Worker (Network-First + Offline Fallback)
-   Cache version: rajachess-v28
+   Cache version: rajachess-v29
    ═══════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'rajachess-v28';
+const CACHE_NAME = 'rajachess-v29';
 
 /* Core assets to pre-cache on install */
 const PRECACHE_ASSETS = [
@@ -11,6 +11,7 @@ const PRECACHE_ASSETS = [
   '/index.html',
   '/css/styles.css',
   '/js/script.js',
+  '/js/online.js',
   '/manifest.json',
   '/icon.png'
 ];
