@@ -86,26 +86,42 @@ body:has(#game-screen.active),
 .screen {
   display: none;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
 }
 
 .screen.active {
   display: flex;
 }
 
-/* ── Setup Screen ─────────────────────────────────────────── */
-#setup-screen {
+/* ── Setup & Selection Screens (Full viewport height + scroll safe) ── */
+#setup-screen,
+#mode-screen,
+#board-style-screen,
+#ns4-style-screen {
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Animated background orbs */
+/* Animated background orbs — fixed to viewport so background NEVER cuts off */
 .setup-bg {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
   pointer-events: none;
   z-index: 0;
+  overflow: hidden;
   /* deep royal vignette */
   background:
     radial-gradient(ellipse 90% 60% at 50% 0%, rgba(76, 29, 149, 0.55) 0%, transparent 70%),
@@ -117,8 +133,16 @@ body:has(#game-screen.active),
 .bg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(80px);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
   animation: orbFloat 14s ease-in-out infinite alternate;
+}
+
+/* Pause background orbs during active gameplay to maximize mobile 60fps performance */
+body.gameplay-active .bg-orb,
+#game-screen.active ~ * .bg-orb {
+  animation-play-state: paused !important;
 }
 
 .orb-1 {
@@ -165,19 +189,19 @@ body:has(#game-screen.active),
 
 @keyframes orbFloat {
   0% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   33% {
-    transform: translate(20px, -18px) scale(1.05);
+    transform: translate3d(20px, -18px, 0) scale(1.05);
   }
 
   66% {
-    transform: translate(-12px, 22px) scale(0.97);
+    transform: translate3d(-12px, 22px, 0) scale(0.97);
   }
 
   100% {
-    transform: translate(35px, 12px) scale(1.10);
+    transform: translate3d(35px, 12px, 0) scale(1.10);
   }
 }
 
@@ -191,6 +215,7 @@ body:has(#game-screen.active),
   padding: 48px 24px;
   width: 100%;
   max-width: 760px;
+  margin: auto;
 }
 
 /* Logo */
@@ -466,13 +491,7 @@ body:has(#game-screen.active),
   flex-shrink: 0;
 }
 
-/* ── Mode Screen ──────────────────────────────────────────── */
-#mode-screen {
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
+/* ── Mode Screen Options ──────────────────────────────────── */
 
 .mode-options {
   display: flex;
@@ -1627,24 +1646,8 @@ body:has(#game-screen.active),
   }
 }
 
-.setup-content>* {
-  animation: fadeInUp 0.5s ease both;
-}
-
-.setup-content>*:nth-child(1) {
-  animation-delay: 0.05s;
-}
-
-.setup-content>*:nth-child(2) {
-  animation-delay: 0.12s;
-}
-
-.setup-content>*:nth-child(3) {
-  animation-delay: 0.20s;
-}
-
-.setup-content>*:nth-child(4) {
-  animation-delay: 0.28s;
+.setup-content {
+  animation: fadeInUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes slideIn {

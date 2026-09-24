@@ -1929,7 +1929,7 @@ function executeAIMove(playerId) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   PARTICLE CANVAS — premium floating gold/white particles
+   PARTICLE CANVAS — lightweight floating gold/white particles
    ════════════════════════════════════════════════════════════ */
 function initParticleCanvas() {
   var screens = ['setup-screen', 'mode-screen', 'board-style-screen'];
@@ -1937,28 +1937,48 @@ function initParticleCanvas() {
     var screen = document.getElementById(screenId);
     if (!screen) return;
     var canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;';
+    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;';
     screen.insertBefore(canvas, screen.firstChild);
-    function resize() { canvas.width = screen.offsetWidth || window.innerWidth; canvas.height = screen.offsetHeight || window.innerHeight; }
+
+    function resize() {
+      if (!screen.classList.contains('active')) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
+
     var pts = [];
-    for (var i = 0; i < 60; i++) {
+    for (var i = 0; i < 35; i++) {
       pts.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 1.7 + 0.3,
-        speed: Math.random() * 0.35 + 0.08,
-        drift: (Math.random() - 0.5) * 0.25,
-        alpha: Math.random() * 0.55 + 0.12,
+        x: Math.random() * (canvas.width || window.innerWidth),
+        y: Math.random() * (canvas.height || window.innerHeight),
+        r: Math.random() * 1.5 + 0.3,
+        speed: Math.random() * 0.30 + 0.08,
+        drift: (Math.random() - 0.5) * 0.20,
+        alpha: Math.random() * 0.50 + 0.12,
         gold: Math.random() > 0.45
       });
     }
+
     var ctx = canvas.getContext('2d');
     function frame() {
+      // Pause drawing completely when screen is inactive or tab is hidden
+      if (!screen.classList.contains('active') || document.hidden) {
+        requestAnimationFrame(frame);
+        return;
+      }
+
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      pts.forEach(function (p) {
-        p.y -= p.speed; p.x += p.drift;
+      for (var j = 0; j < pts.length; j++) {
+        var p = pts[j];
+        p.y -= p.speed;
+        p.x += p.drift;
         if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
         if (p.x < -5 || p.x > canvas.width + 5) p.x = Math.random() * canvas.width;
         ctx.beginPath();
@@ -1966,7 +1986,7 @@ function initParticleCanvas() {
         ctx.fillStyle = p.gold ? '#f0c040' : '#e8e0ff';
         ctx.globalAlpha = p.alpha;
         ctx.fill();
-      });
+      }
       ctx.globalAlpha = 1;
       requestAnimationFrame(frame);
     }
