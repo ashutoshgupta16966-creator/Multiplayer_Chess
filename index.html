@@ -117,7 +117,7 @@
         <p class="setup-subheading">Select the number of players to configure the board</p>
 
         <div class="player-options" role="group" aria-label="Player count options">
-          <button class="player-btn" id="btn-2p" data-count="2" aria-label="2 Players - Opposite sides"
+          <button class="player-btn" id="btn-2p" data-count="2" onclick="selectPlayerCount(2)" aria-label="2 Players - Opposite sides"
             aria-pressed="false">
             <div class="player-btn-icon">
               <div class="seat-diagram">
@@ -132,7 +132,7 @@
             <span class="player-btn-detail">Gold vs Sapphire</span>
           </button>
 
-          <button class="player-btn" id="btn-3p" data-count="3" aria-label="3 Players - Three seats active"
+          <button class="player-btn" id="btn-3p" data-count="3" onclick="selectPlayerCount(3)" aria-label="3 Players - Three seats active"
             aria-pressed="false">
             <div class="player-btn-icon">
               <div class="seat-diagram">
@@ -147,7 +147,7 @@
             <span class="player-btn-detail">Gold · Sapphire · Emerald</span>
           </button>
 
-          <button class="player-btn featured" id="btn-4p" data-count="4" aria-label="4 Players - All seats active"
+          <button class="player-btn featured" id="btn-4p" data-count="4" onclick="selectPlayerCount(4)" aria-label="4 Players - All seats active"
             aria-pressed="false">
             <div class="player-btn-icon">
               <div class="seat-diagram">
@@ -164,7 +164,7 @@
           </button>
         </div>
 
-        <button class="start-btn" id="start-btn" disabled aria-label="Start game — choose a player count first">
+        <button class="start-btn" id="start-btn" disabled onclick="confirmPlayerCountAndProceed()" aria-label="Start game — choose a player count first">
           <span class="start-btn-text">Select player count first</span>
           <svg class="start-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd"

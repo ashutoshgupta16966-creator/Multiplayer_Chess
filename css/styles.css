@@ -318,6 +318,12 @@ body.gameplay-active .bg-orb,
   outline: none;
   flex: 1;
   max-width: 200px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.player-btn * {
+  pointer-events: none;
 }
 
 .player-btn:hover {

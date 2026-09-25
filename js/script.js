@@ -2034,7 +2034,8 @@ function initParticleCanvas() {
 /* ════════════════════════════════════════════════════════════
    SETUP SCREEN LOGIC
    ════════════════════════════════════════════════════════════ */
-let selectedPlayerCount = null;
+var selectedPlayerCount = null;
+window.selectedPlayerCount = null;
 var selectedMode = null;   // 'friends' | 'computer'
 var selectedDifficulty = null; // 'beginner' | 'intermediate' | 'advanced'
 var selectedBoardStyle = null; // 'ordinary' | 'newstyle' (for 3/4 player only)
@@ -2163,22 +2164,74 @@ function selectNS4Style(style) {
 }
 
 function selectPlayerCount(count) {
+  count = Number(count);
+  if (!count || (count !== 2 && count !== 3 && count !== 4)) {
+    console.warn('[RajaChess] Invalid player count selected:', count);
+    return;
+  }
   selectedPlayerCount = count;
-  playerBtns.forEach(btn => {
-    const sel = Number(btn.dataset.count) === count;
-    btn.classList.toggle('selected', sel);
-    btn.setAttribute('aria-pressed', String(sel));
-  });
-  startBtn.disabled = false;
-  startBtnText.textContent = `Next: Choose Mode →`;
-}
+  window.selectedPlayerCount = count;
+  console.log('[RajaChess] Player count chosen:', count);
 
-playerBtns.forEach(btn => {
-  btn.addEventListener('click', () => selectPlayerCount(Number(btn.dataset.count)));
-  btn.addEventListener('keydown', e => {
+  // Dynamically update card selection visual state
+  var btns = document.querySelectorAll('.player-btn');
+  btns.forEach(function (btn) {
+    var btnCount = Number(btn.getAttribute('data-count') || (btn.dataset ? btn.dataset.count : null));
+    var isSel = (btnCount === count);
+    btn.classList.toggle('selected', isSel);
+    btn.setAttribute('aria-pressed', String(isSel));
+  });
+
+  // Enable and update Start CTA button
+  var startBtnEl = document.getElementById('start-btn');
+  if (startBtnEl) {
+    startBtnEl.disabled = false;
+    startBtnEl.removeAttribute('aria-disabled');
+    startBtnEl.style.pointerEvents = 'auto';
+    var txtEl = startBtnEl.querySelector('.start-btn-text');
+    if (txtEl) {
+      txtEl.textContent = 'Next: Choose Mode →';
+    }
+  }
+}
+window.selectPlayerCount = selectPlayerCount;
+
+function confirmPlayerCountAndProceed() {
+  if (!selectedPlayerCount) {
+    console.warn('[RajaChess] Cannot proceed: no player count selected');
+    return;
+  }
+  console.log('[RajaChess] Proceeding to mode selection with player count:', selectedPlayerCount);
+
+  // Reset mode screen and board style state
+  selectedMode = null;
+  selectedDifficulty = null;
+  selectedBoardStyle = null;
+  document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); });
+  document.querySelectorAll('.diff-btn').forEach(function (b) { b.classList.remove('selected'); });
+  var dp = document.getElementById('difficulty-panel');
+  if (dp) {
+    dp.classList.remove('visible');
+    dp.setAttribute('aria-hidden', 'true');
+  }
+  var sub = document.getElementById('mode-screen-subtitle');
+  if (sub) sub.textContent = selectedPlayerCount + '-Player Game';
+  _updateModeStartBtn();
+  showScreen('mode-screen');
+}
+window.confirmPlayerCountAndProceed = confirmPlayerCountAndProceed;
+
+// Attach click & keyboard listeners as an enhancement to inline onclick
+document.querySelectorAll('.player-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var count = Number(btn.getAttribute('data-count') || (btn.dataset ? btn.dataset.count : null));
+    if (count) selectPlayerCount(count);
+  });
+  btn.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      selectPlayerCount(Number(btn.dataset.count));
+      var count = Number(btn.getAttribute('data-count') || (btn.dataset ? btn.dataset.count : null));
+      if (count) selectPlayerCount(count);
     }
   });
 });
@@ -2201,16 +2254,20 @@ function _resetScreenState(id) {
     case 'setup-screen':
       // Reset player-count selection and start button
       selectedPlayerCount = null;
+      window.selectedPlayerCount = null;
       document.querySelectorAll('.player-btn').forEach(function (b) {
         b.classList.remove('selected');
         b.setAttribute('aria-pressed', 'false');
         b.disabled = false;
         b.style.pointerEvents = '';
       });
-      if (startBtn) {
-        startBtn.disabled = true;
-        startBtn.style.pointerEvents = '';
-        if (startBtnText) startBtnText.textContent = 'Select player count first';
+      var setupStartBtn = document.getElementById('start-btn');
+      if (setupStartBtn) {
+        setupStartBtn.disabled = true;
+        setupStartBtn.setAttribute('aria-disabled', 'true');
+        setupStartBtn.style.pointerEvents = '';
+        var setupStartTxt = setupStartBtn.querySelector('.start-btn-text');
+        if (setupStartTxt) setupStartTxt.textContent = 'Select player count first';
       }
       break;
 
@@ -3141,22 +3198,9 @@ window.addEventListener('popstate', function (e) {
   showScreen(targetScreen, false);
 });
 
-startBtn.addEventListener('click', function () {
-  if (!selectedPlayerCount) return;
-  // Reset mode screen and board style state
-  selectedMode = null;
-  selectedDifficulty = null;
-  selectedBoardStyle = null;
-  document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); });
-  document.querySelectorAll('.diff-btn').forEach(function (b) { b.classList.remove('selected'); });
-  var dp = document.getElementById('difficulty-panel');
-  dp.classList.remove('visible');
-  dp.setAttribute('aria-hidden', 'true');
-  var sub = document.getElementById('mode-screen-subtitle');
-  if (sub) sub.textContent = selectedPlayerCount + '-Player Game';
-  _updateModeStartBtn();
-  showScreen('mode-screen');
-});
+if (startBtn) {
+  startBtn.addEventListener('click', confirmPlayerCountAndProceed);
+}
 backBtn.addEventListener('click', returnToMenu);
 
 document.addEventListener('keydown', e => {
