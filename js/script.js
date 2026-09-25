@@ -251,6 +251,7 @@ var currentPlayerIndex = 0;
 var eliminatedSet = new Set();
 var aiPlayerIds = new Set();
 var moveHistory = [];
+var captureLog = [];  // Chronological log of each capture: { byName, byColor, ofName, ofColor, type, symbol }
 var lastBoardInput = { key: '', time: 0 };
 var boardStyleMode = 'ordinary'; // 'ordinary' | 'newstyle' (3/4 player only)
 
