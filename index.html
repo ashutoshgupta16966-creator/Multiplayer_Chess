@@ -217,15 +217,8 @@
           <button class="mode-btn" id="mode-friends" onclick="selectMode('friends')">
             <div class="mode-btn-icon">🤝</div>
             <div class="mode-btn-body">
-              <span class="mode-btn-title">Play with Friends (Offline)</span>
+              <span class="mode-btn-title">Play with Friends</span>
               <span class="mode-btn-desc">All players take turns on this device</span>
-            </div>
-          </button>
-          <button class="mode-btn" id="mode-online" onclick="selectMode('online')">
-            <div class="mode-btn-icon">🌐</div>
-            <div class="mode-btn-body">
-              <span class="mode-btn-title">Play with Friends (Online)</span>
-              <span class="mode-btn-desc">Private room with code &amp; mobile invites</span>
             </div>
           </button>
           <button class="mode-btn" id="mode-computer" onclick="selectMode('computer')">
@@ -280,128 +273,7 @@
     </div>
   </div>
 
-  <!-- ═══ Online Multiplayer Lobby Screen ═══ -->
-  <div id="online-screen" class="screen" role="main" aria-label="Online Multiplayer Lobby">
-    <div class="setup-bg">
-      <div class="bg-orb orb-1"></div>
-      <div class="bg-orb orb-2"></div>
-      <div class="bg-orb orb-3"></div>
-      <div class="bg-orb orb-4"></div>
-    </div>
-    <div class="setup-content">
-      <div class="logo-area">
-        <h1 class="logo-title">👑 Raja<span class="logo-x">Chess</span></h1>
-        <p class="logo-tagline" id="online-screen-subtitle">Play Online with Friends</p>
-      </div>
 
-      <div class="setup-card online-card">
-        <!-- Sub-tabs: Create Room vs Join Room -->
-        <div class="online-tabs" role="tablist">
-          <button class="online-tab active" id="tab-create-room" onclick="switchOnlineTab('create')">
-            <span>⚡</span> Create Room
-          </button>
-          <button class="online-tab" id="tab-join-room" onclick="switchOnlineTab('join')">
-            <span>🔑</span> Join Room
-          </button>
-        </div>
-
-        <!-- ── CREATE ROOM PANEL ── -->
-        <div id="panel-create-room" class="online-panel">
-          <div id="create-room-form">
-            <div class="online-badge" id="online-badge-count">🎮 2 Players Match</div>
-            <p class="online-hint">Enter your mobile number and your friends' mobile numbers to create a private room.</p>
-            
-            <div class="form-group">
-              <label for="create-host-phone">Your Mobile Number (Host — Gold 👑):</label>
-              <input type="tel" id="create-host-phone" class="online-input" placeholder="Enter 10-digit mobile number" maxlength="10" />
-            </div>
-
-            <div id="create-friends-container">
-              <!-- Dynamically populated based on selectedPlayerCount - 1 -->
-            </div>
-
-            <div id="create-error-msg" class="online-error-msg hidden"></div>
-
-            <button class="start-btn online-action-btn" id="btn-create-room" onclick="submitCreateRoom()">
-              <span class="start-btn-text">Generate Room Code</span>
-              <span class="online-btn-icon">⚡</span>
-            </button>
-          </div>
-
-          <!-- LOBBY DISPLAY (Shown after room created) -->
-          <div id="create-room-lobby" class="online-lobby hidden">
-            <div class="room-code-box">
-              <span class="room-code-label">ROOM CODE</span>
-              <div class="room-code-display" id="display-room-code">------</div>
-              <button class="copy-code-btn" id="btn-copy-code" onclick="copyRoomCode()">
-                <span id="copy-btn-icon">📋</span> <span id="copy-btn-text">Copy Code</span>
-              </button>
-            </div>
-
-            <p class="lobby-instructions">Share this code with your whitelisted friends. They will enter this code and their mobile number to join.</p>
-
-            <div class="lobby-players-list">
-              <h4 class="lobby-players-title">Players in Room:</h4>
-              <div id="create-players-slots" class="player-slots-grid"></div>
-            </div>
-
-            <div id="create-lobby-status" class="lobby-status-banner">Waiting for all invited friends to join...</div>
-
-            <button class="start-btn online-action-btn" id="btn-host-start" disabled onclick="submitStartOnlineGame()">
-              <span class="start-btn-text">Start Match</span>
-              <span class="online-btn-icon">⚔️</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- ── JOIN ROOM PANEL ── -->
-        <div id="panel-join-room" class="online-panel hidden">
-          <div id="join-room-form">
-            <p class="online-hint">Enter the 6-character room code from your host and your invited mobile number.</p>
-
-            <div class="form-group">
-              <label for="join-room-code">Room Code:</label>
-              <input type="text" id="join-room-code" class="online-input code-input" placeholder="e.g. V828S7" maxlength="6" style="text-transform:uppercase;" />
-            </div>
-
-            <div class="form-group">
-              <label for="join-player-phone">Your Mobile Number:</label>
-              <input type="tel" id="join-player-phone" class="online-input" placeholder="Enter 10-digit mobile number" maxlength="10" />
-            </div>
-
-            <div id="join-error-msg" class="online-error-msg hidden"></div>
-
-            <button class="start-btn online-action-btn" id="btn-join-room" onclick="submitJoinRoom()">
-              <span class="start-btn-text">Enter Game Room</span>
-              <span class="online-btn-icon">🚪</span>
-            </button>
-          </div>
-
-          <!-- JOINED LOBBY DISPLAY -->
-          <div id="join-room-lobby" class="online-lobby hidden">
-            <div class="joined-badge" id="joined-player-badge">Joined as Sapphire (🔵)</div>
-            <div class="room-code-box compact">
-              <span class="room-code-label">ROOM:</span>
-              <span class="room-code-compact" id="join-display-room-code">------</span>
-            </div>
-
-            <div class="lobby-players-list">
-              <h4 class="lobby-players-title">Room Roster:</h4>
-              <div id="join-players-slots" class="player-slots-grid"></div>
-            </div>
-
-            <div class="lobby-status-banner pulse" id="join-lobby-status">
-              <span class="spinner">⏳</span> Waiting for host to launch the match...
-            </div>
-          </div>
-        </div>
-
-        <div class="mode-actions">
-          <button class="menu-btn mode-back-btn" onclick="navigateBack('mode-screen')">← Back</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══ Board Style Selection Screen (3 & 4 Players only) ═══ -->
   <div id="board-style-screen" class="screen" role="main" aria-label="Board Style Selection">
@@ -607,10 +479,7 @@
           <span class="disqualified-banner-icon">💀</span>
           <span id="disqualified-banner-text">White has been Disqualified!</span>
         </div>
-        <div id="online-status-banner" class="check-banner online-status-banner hidden" aria-hidden="true">
-          <span class="check-banner-icon" id="online-banner-icon">📡</span>
-          <span id="online-banner-text">Opponent disconnected. Waiting to reconnect...</span>
-        </div>
+
 
         <div id="chess-board" class="chess-board" role="grid" aria-label="14x14 chess board"></div>
         <!-- SVG overlay draws the outer board shape boundary on top without blocking pointer events -->
@@ -739,9 +608,7 @@
   </div>
 
   <!-- ═══ Scripts ═══ -->
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="js/script.js"></script>
-  <script src="js/online.js"></script>
   <script>
     /* ── PWA: Service Worker Registration & Live Update Handling ── */
     if ('serviceWorker' in navigator) {
