@@ -2989,14 +2989,12 @@ function startGame() {
   var activeIds = getActivePlayers(selectedPlayerCount);
 
   // ── Game state reset ────────────────────────────────────────
-  // Build the active player list in TURN_ORDER_ALL clockwise order
   gameActivePlayers = TURN_ORDER_ALL
     .filter(function (id) { return activeIds.indexOf(id) !== -1; })
     .map(function (id) { return PLAYER_DEFS[id]; });
-  currentPlayerIndex = 0;     // Red always goes first
+  currentPlayerIndex = 0;
   eliminatedSet = new Set();
   aiPlayerIds = new Set();
-  // Set up AI players (human is always Red in vs-computer mode)
   if (selectedMode === 'computer') {
     activeIds.forEach(function (id) { if (id !== 'red') aiPlayerIds.add(id); });
   }
@@ -3007,11 +3005,25 @@ function startGame() {
   movesWithoutProgress = 0;
   document.getElementById('undo-btn').disabled = true;
 
-  // ── Render board + pieces ────────────────────────────────────
+  // ── Pre-hide the board so cells + pieces mount invisibly ────
+  // This prevents the "empty grid" flash: the board is hidden
+  // while we build all DOM content, then revealed atomically.
+  var boardEl = document.getElementById('chess-board');
+  var boardSpinner = document.getElementById('board-loading-indicator');
+  if (boardEl) {
+    boardEl.classList.add('board-hidden');
+  }
+  if (boardSpinner) {
+    boardSpinner.style.display = 'flex';
+  }
+
+  // ── Activate the game screen (needed for getBoundingClientRect) ──
   showScreen('game-screen');
+
+  // ── Build board + pieces while still hidden ─────────────────
   renderBoard(activeIds);
   placeAllPieces(activeIds);
-  initBoardState(activeIds);  // sync logical state with DOM
+  initBoardState(activeIds);
 
   // Apply visual themes
   if (typeof StoreManager !== 'undefined') {
@@ -3033,6 +3045,19 @@ function startGame() {
   updateCapturedArea();
   var logEl = document.getElementById('move-log');
   if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
+
+  // ── Reveal the fully-populated board on the very next frame ──
+  // By this point all cells AND piece spans are in the DOM.
+  // Removing board-hidden triggers the slideIn CSS animation so
+  // the user sees a smooth entrance — never a pieceless grid.
+  requestAnimationFrame(function () {
+    if (boardEl) {
+      boardEl.classList.remove('board-hidden');
+    }
+    if (boardSpinner) {
+      boardSpinner.style.display = 'none';
+    }
+  });
 }
 
 function returnToMenu(pushHistory) {
@@ -3051,6 +3076,12 @@ function returnToMenu(pushHistory) {
   updateCapturedArea();
   var logEl = document.getElementById('move-log');
   if (logEl) logEl.innerHTML = '<p class="log-empty">No moves yet.</p>';
+
+  // Ensure board state is clean for next startGame()
+  var boardEl = document.getElementById('chess-board');
+  if (boardEl) boardEl.classList.remove('board-hidden');
+  var boardSpinner = document.getElementById('board-loading-indicator');
+  if (boardSpinner) boardSpinner.style.display = 'none';
 
   _resetScreenState('setup-screen');
   showScreen('setup-screen', pushHistory);
