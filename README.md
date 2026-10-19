@@ -56,3 +56,14 @@ Multiplayer_Chess/
 ├── manifest.json         # Web App Manifest for PWA support
 ├── sw.js                 # Service Worker for offline play & asset caching
 └── vercel.json           # Vercel deployment configuration
+```
+---
+
+## 👤 Author
+
+**Ashutosh Gupta**
+B.Tech Computer Science Engineering, GL Bajaj Group of Institutions, Mathura 
+
+- Connected with me on LinkedIn: https://www.linkedin.com/in/ashutosh-gupta-910148381
+
+---
