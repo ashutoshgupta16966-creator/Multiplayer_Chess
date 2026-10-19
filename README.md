@@ -1,24 +1,41 @@
-# ♟️ Multiplayer Chess
+# 👑 RajaChess — Gamified Multi-Player & Smart AI Chess Platform
 
-> A responsive, interactive, and Progressive Web App (PWA) enabled online chess game built with modern vanilla JavaScript, custom CSS, and seamless Vercel deployment.
+> A feature-packed, gamified web chess application supporting 2-Player, 3-Player, and 4-Player variant modes powered by custom Smart AI, in-game economy, synthesized Web Audio, and real-time player analytics.
 
 ---
 
 ## ✨ Features
 
-- 🎮 **Interactive Gameplay**: Real-time chess board rendering with move validation and state management.
-- 📱 **PWA & Mobile Support**: Service worker support (`sw.js`) and web app manifest (`manifest.json`) for seamless mobile installation and offline usability.
-- 🎨 **Modular Architecture**: Separate JavaScript modules for board representation, rendering logic, player handling, and game controls.
-- 🚀 **Fast & Lightweight**: Pure HTML5, CSS3, and modern JavaScript without heavy dependencies.
-- ⚡ **Vercel Ready**: Pre-configured `vercel.json` for effortless hosting and instant deployment.
+- ♟️ **Multi-Player Battlefield**:
+  - **2-Player, 3-Player, & 4-Player Variants**: Play classic 2P chess or jump into chaotic 3-Player and 4-Player modes with 4 Kings on the same board.
+  - **Local & AI Multiplayer**: Play against local friends or custom AI bots.
+
+- 🤖 **Smart Multi-King AI Engine**:
+  - Custom position evaluation algorithms tailored across 3 difficulty levels (**Basic**, **Intermediate**, **Advanced**).
+  - Built-in **anti-loop endgame resolution** to prevent repetitive move locks.
+
+- 🪙 **"Shahi Khazana" Virtual Economy**:
+  - In-game points and rewards system stored securely via `localStorage`.
+  - Win matches to earn **Gold Coins** and unlock exclusive **Board Themes**, **Piece Skins**, and **Custom Piece Shapes** in the store.
+
+- 🎵 **Synthesized Web Audio Engine**:
+  - Built using pure **JS Web Audio API** for instant move, capture, check, and victory sound effects.
+  - **Zero external audio downloads**—lightweight, fast, and includes live mute toggles.
+
+- 📊 **Player Analytics & Badge System**:
+  - Real-time Stats Dashboard tracking **Win Rate %** and **Matches Played**.
+  - Achievement Badges system (e.g., *"First Victory"*, *"Grand Monarch"*, *"Treasury Tycoon"*).
+
+- ⚡ **Pure Vanilla Power**:
+  - Built 100% using HTML5, CSS3, and ES6+ JavaScript with zero external frameworks for maximum performance.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+ Modules)
-- **Progressive Web App (PWA)**: Service Workers (`sw.js`), `manifest.json`
-- **Deployment**: Vercel (`vercel.json`)
+- **Audio**: Web Audio API (Synthesized SFX without external audio files)
+- **Storage**: `localStorage` API (Game state, gold coins, unlocked skins, player stats)
 
 ---
 
@@ -27,16 +44,15 @@
 ```text
 Multiplayer_Chess/
 ├── css/
-│   └── styles.css        # Core stylesheet & layout designs
+│   └── styles.css        # Core game styling, store themes & responsive UI
 ├── js/
-│   ├── board.js          # Chess board state & move calculations
-│   ├── main.js           # Main app initialization & event wiring
-│   ├── players.js        # Player state & turn management
-│   ├── renderer.js       # UI rendering & board graphics handler
-│   └── script.js         # Core application scripts
-├── .gitignore            # Git ignore rules
-├── icon.png              # App icon for PWA
-├── index.html            # Main HTML markup
-├── manifest.json         # Web App Manifest for mobile/PWA
-├── sw.js                 # Service Worker for offline support & caching
+│   ├── board.js          # Board geometry, 2P/3P/4P state & move calculations
+│   ├── main.js           # Game initialization & event handlers
+│   ├── players.js        # Turn management, AI evaluation & stats tracking
+│   ├── renderer.js       # Board graphics, piece skins & UI rendering
+│   └── script.js         # Core application logic & Web Audio synthesizer
+├── icon.png              # App icon
+├── index.html            # Game viewport markup & UI modals
+├── manifest.json         # Web App Manifest for PWA support
+├── sw.js                 # Service Worker for offline play & asset caching
 └── vercel.json           # Vercel deployment configuration
